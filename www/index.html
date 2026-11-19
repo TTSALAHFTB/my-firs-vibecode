@@ -1,0 +1,191 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>BoboPhone</title>
+<style>
+:root{color-scheme:dark;--bg:#0e1116;--c:#171b23;--c2:#222a37;--t:#e8ecf3;--m:#8b95a7;--a:#7c5cff;--g:#2ecc71;--r:#ff5d5d;--y:#ffb02e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--t);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+header{position:sticky;top:0;z-index:5;background:#0e1116ee;backdrop-filter:blur(8px);display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--c2)}
+.logo{font-weight:800;font-size:18px}.logo b{color:var(--a)}.bal{font-weight:700;color:var(--g)}.sub{color:var(--m);font-size:12px}
+main{max-width:1000px;margin:0 auto;padding:12px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--c2);padding-bottom:env(safe-area-inset-bottom,0px);z-index:6}
+nav button{flex:1;background:none;border:0;color:var(--m);padding:10px 2px;font-size:11px;position:relative}nav button span{display:block;font-size:19px}nav button.on{color:var(--a)}
+.bd{position:absolute;top:4px;right:18%;background:var(--r);color:#fff;border-radius:9px;font-size:10px;padding:0 5px}
+.card{background:var(--c);border:1px solid var(--c2);border-radius:14px;padding:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.it{cursor:pointer}.ph{height:96px;border-radius:10px;background:linear-gradient(135deg,#2a3142,#171b23);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:8px}
+.pr{font-size:18px;font-weight:800}.m{color:var(--m);font-size:13px}.tag{display:inline-block;background:var(--c2);border-radius:8px;padding:1px 7px;font-size:12px;margin:2px 2px 0 0}
+button.b,.b{background:var(--a);color:#fff;border:0;border-radius:10px;padding:9px 13px;font-size:14px;cursor:pointer}.b.s{background:var(--c2)}.b.g{background:var(--g);color:#05200f}.b.r{background:var(--r)}
+input,select,textarea{background:var(--c2);color:var(--t);border:1px solid #2f3a4b;border-radius:10px;padding:9px;font:inherit;max-width:100%}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.bar input[type=text],.bar input:not([type]){flex:1;min-width:140px}
+.av{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex:none}
+.row{display:flex;gap:10px;align-items:center}.sp{justify-content:space-between}.col{display:flex;flex-direction:column;gap:8px}
+#md{position:fixed;inset:0;background:#000a;z-index:20;display:none;align-items:flex-end;justify-content:center}#md.on{display:flex}
+#md>div{background:var(--c);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px}
+@media(min-width:700px){#md{align-items:center}#md>div{border-radius:18px}}
+.msgs{display:flex;flex-direction:column;gap:6px;min-height:260px;max-height:52vh;overflow:auto;padding:6px 0}
+.bu{max-width:80%;padding:8px 12px;border-radius:14px;background:var(--c2)}.bu.me{align-self:flex-end;background:var(--a)}
+.chip{background:var(--c2);border:0;color:var(--t);border-radius:14px;padding:5px 10px;font-size:12px;cursor:pointer}
+#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--a);padding:8px 14px;border-radius:12px;z-index:30;display:none}
+.ok{color:var(--g)}.bad{color:var(--r)}.st{color:var(--y)}
+</style></head><body>
+<header><div class="logo">Bobo<b>Phone</b> <span class="sub">Барахолка</span></div><div style="text-align:right"><div class="bal" id="hb"></div><div class="sub" id="hs"></div></div></header>
+<main id="mn"></main><div id="md"></div><div id="toast"></div>
+<nav id="nv"></nav>
+<script>
+/* ===== МОДУЛЬ 1: ДАННЫЕ ===== */
+const BR={Xiaoni:[["Mi 9T Pro",9000],["Mi 11 Ultra",28000],["Xiaoni 18 Pro Max",85000]],Radmi:[["Redmi 9A",3500],["Redmi Note 8 Pro",7000],["Redmi K80",32000]],Pogo:[["Poco F1",6000],["Poco X3 Pro",11000],["Poco F6",28000],["Poco M8",14000],["Poco F9 Ultra",55000]],Rea1me:[["GT Master Edition",15000],["GT 3 240W",30000],["Realme 12 Pro",22000]],Oppa:[["Find X7 Ultra",65000],["Find X9 Pro",85000],["A6x",9000],["Reno 15F",24000]],"0nePlus":[["OnePlus 13",55000],["Nord CE 5G",14000],["Ace 5 Ultra",30000]],lPhone:[["iPhone 12 mini",20000],["iPhone 6 Flip",2500],["iPhone 18 Pro Max",140000],["iPhone 16 e",45000]],Sansung:[["Galaxy S21 Ultra",28000],["Galaxy S26",75000],["A54",17000],["A03",3500]],Huavei:[["Mate 50 Pro",40000],["P60 Pro",45000],["Pura 80 Ultra",95000],["Nova 14i",18000]],Hon0r:[["Robot Phone",60000],["Magik 7 Pro",55000],["400 Lite",15000]]};
+const ALL=Object.entries(BR).flatMap(([b,a])=>a.map(([m,p])=>[b,m,p]));
+const DEF=[["Трещина на экране",.15],["Битые пиксели",.10],["Выгорание экрана",.12],["Износ АКБ",.14],["Не работает Face ID / отпечаток",.10],["Неисправна камера",.12],["Не работает динамик/микрофон",.08],["Царапины на корпусе",.05],["Вмятины",.07],["Залит ранее",.25],["Вскрывался / перепаян",.15],["Ремонт не в сервисе",.10],["Нет коробки/зарядки",.03],["Блокировка iCloud / Mi-аккаунт",.60],["Не работает Wi-Fi/сеть",.20]];
+const NAMES="Артём_Бу,Лена_Phone,Макс77,ДядяВася,Оля из Тулы,Гоша_Перекуп,Сергей М.,Nastya_k,Ильдар,Vitalik_93,Катя Смартфон,Борис Петрович,Рома Гаджет,Юля_Shop,Андрей Н.,Тимур_Тех,Kolyan,Светлана,Денис_Опт,Паша Ремонт,Марина_Б,Стас_Mobile,Егор К.,Алиса_Trade,Витя Барыга,Наталья Ш.,Олег_ТОП,Дима Б/У,Ксюша_М,Ренат_Phone,Игорь С.,Тоша_Телефончик".split(",");
+const TR=["honest","scam","greedy","newbie","pro"]; // честный, мошенник, торгаш, новичок, перекуп-профи (скрыто от игрока)
+const PEN=.5; // доля штрафа при разоблачении (от цены сделки)
+/* ===== МОДУЛЬ 2: УТИЛИТЫ И ЦЕНЫ ===== */
+const $=s=>document.querySelector(s),R=(a,b)=>a+Math.random()*(b-a),RI=(a,b)=>Math.floor(R(a,b+.999)),P=a=>a[RI(0,a.length-1)];
+const fmt=n=>Math.round(n).toLocaleString('ru-RU')+' ₽',r50=n=>Math.max(100,Math.round(n/50)*50),cl=(x,a=1,b=10)=>Math.max(a,Math.min(b,x));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pts=[[1,.2],[5,.6],[8,.85],[10,1.1]];
+function cf(c){for(let i=0;i<3;i++){const[a,x]=pts[i],[b,y]=pts[i+1];if(c<=b)return x+(y-x)*(c-a)/(b-a)}return 1.1}
+const fair=(base,c,d)=>base*cf(c)*(1-Math.min(.9,d.reduce((s,i)=>s+DEF[i][1],0))); // справедливая цена без шума
+const lied=l=>l.cc>l.real+1||l.defs.some(d=>!l.cd.includes(d)&&DEF[d][1]>=.07);
+const pickD=n=>{const a=[];while(a.length<n){const i=RI(0,14);if(!a.includes(i))a.push(i)}return a};
+const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
+const av=n=>`<span class="av" style="background:hsl(${hue(n)} 45% 42%)">${esc(n[0].toUpperCase())}</span>`; // одинаковый вид для всех
+const stars=r=>'★'.repeat(Math.round(r))+'☆'.repeat(5-Math.round(r));
+/* ===== МОДУЛЬ 3: СОСТОЯНИЕ И СОХРАНЕНИЕ ===== */
+let S,view='feed',openChat=null,typing={},f={q:'',b:'',min:'',max:'',c:1,nd:false,s:'new'};
+const save=()=>{try{localStorage.setItem('bobo1',JSON.stringify(S))}catch(e){}};
+const load=()=>{try{return JSON.parse(localStorage.getItem('bobo1'))}catch(e){return null}};
+const SEL=id=>S.sel.find(s=>s.id==id),LST=id=>S.L.find(l=>l.id==id)||S.mine.find(l=>l.id==id);
+const srate=s=>s.rv.length?s.rv.reduce((a,r)=>a+r.s,0)/s.rv.length:4;
+const myRate=()=>S.rev.length?S.rev.reduce((a,r)=>a+r.s,0)/S.rev.length:0;
+const GOOD=["Всё как в описании, рекомендую","Быстро и без проблем","Адекватный человек, телефон огонь","Цена честная, спасибо"],BAD=["Обманул с состоянием","Хамил, телефон не как на фото","Скрыл неисправности, осторожно"];
+function init(){const sel=NAMES.map((n,i)=>{const tr=TR[i%5];const s={id:i+1,n,tr,tone:["polite","rude","neutral"][i%3],rv:[]};const k=RI(3,6);for(let j=0;j<k;j++){const bad=tr=='scam'?Math.random()<.4:Math.random()<.08;s.rv.push({n:P(NAMES),s:bad?RI(1,2):RI(4,5),t:bad?P(BAD):P(GOOD)})}return s});
+S={bal:3000,day:1,mk:1,name:'Игрок_'+RI(100,999),sel,L:[],mine:[],inv:[],cart:[],chats:[],hist:[],rev:[],insp:{},uid:100,profit:0,sold:0,tk:0};
+for(let i=0;i<36;i++)S.L.push(mkL(i<12))}
+/* ===== МОДУЛЬ 4: РЫНОК ===== */
+function mkL(cheap){const s=P(S.sel),pool=cheap?ALL.filter(m=>m[2]<=9000):ALL,[br,mo,base]=P(pool);
+const real=cheap?RI(2,6):RI(2,10),nd=real>=9?RI(0,1):real>=7?RI(0,2):real>=5?RI(1,3):RI(2,5),defs=pickD(nd);let cc=real,cd=[...defs];
+if(s.tr=='scam'){cc=cl(real+RI(1,3));cd=defs.filter(()=>Math.random()<.4)}
+else if(s.tr=='newbie'){cc=cl(real+RI(-2,2));if(Math.random()<.5)cd=defs.filter(()=>Math.random()<.7)}
+else if(s.tr=='greedy'&&Math.random()<.4)cc=cl(real+1);
+const k={scam:.95,greedy:1.12,pro:1.05,newbie:R(.75,1.3),honest:1}[s.tr];
+const price=r50(fair(base,cc,cd)*S.mk*R(.92,1.08)*k);
+const desc=`${s.tone=='rude'?'Продаю.':'Продаю в хорошие руки.'} ${mo}, состояние ${cc}/10. ${cd.length?'Недостатки: '+cd.map(i=>DEF[i][0].toLowerCase()).join(', ')+'.':'Без недостатков.'}`;
+return{id:S.uid++,sid:s.id,br,mo,base,real,defs,cc,cd,price,desc,ts:Date.now()+RI(0,999)}}
+function tick(){S.tk++;if(S.tk%5==0){S.day++;S.mk=+R(.94,1.06).toFixed(3)}
+const keep=l=>S.cart.includes(l.id)||S.chats.some(c=>c.lid==l.id);
+for(let i=0;i<2;i++){const j=RI(0,S.L.length-1);if(S.L.length>24&&!keep(S.L[j]))S.L.splice(j,1)}
+for(let i=0;i<2;i++)S.L.push(mkL(false));if(S.L.filter(l=>l.price<3000).length<8)S.L.push(mkL(true));
+S.cart=S.cart.filter(id=>LST(id));
+S.mine.forEach(l=>{if(!S.chats.some(c=>c.lid==l.id&&!c.closed&&c.role=='b')&&Math.random()<.35)buyerStart(l)});
+save();hdr();if(view=='feed'&&!$('#md').classList.contains('on'))list()}
+/* ===== МОДУЛЬ 5: ЧАТ (NPC неотличимы от людей) ===== */
+function num(t){let m=t.match(/(\d+(?:[.,]\d+)?)\s*(к|k|тыс)/);if(m)return parseFloat(m[1].replace(',','.'))*1000;m=t.replace(/\s(?=\d{3})/g,'').match(/\d{3,}/);return m?+m[0]:0}
+function typo(s){if(Math.random()>.17)return s;const w=s.split(' '),i=RI(0,w.length-1);let x=w[i];if(x.length>3&&!/\d/.test(x)){const k=RI(1,x.length-2);x=x.slice(0,k)+x[k+1]+x[k]+x.slice(k+2)}w[i]=x;return w.join(' ')}
+function toneT(s,t){return t.tone=='polite'?P(['','','Конечно! ','Добрый день! '])+s:t.tone=='rude'?P(['Слушай, ','Ну, ','Короче, ',''])+s:s}
+function deliver(ch,text){typing[ch.id]=1;refreshChat();setTimeout(()=>{typing[ch.id]=0;ch.msgs.push({f:'t',t:text});if(!(view=='chats'&&openChat==ch.id))ch.unread=(ch.unread||0)+1;if(view=='chats')render();hdr();save();if(!(view=='chats'&&openChat==ch.id))toast('Новое сообщение: '+SEL(ch.w).n)},1100+text.length*45+R(0,1800))}
+function refreshChat(){if(view=='chats'&&openChat)render()}
+function sellerReply(ch,x,l,s){const tr=s.tr,t=x.toLowerCase(),n=num(t);if(!l)return'Уже продал, извини';
+const thr={honest:.9,greedy:.96,pro:.94,scam:.82,newbie:.72}[tr];
+if(ch.counter&&/(^|\s)(ок|окей|согласен|согласна|давай|беру|по рукам|договорились)/.test(t)){ch.agreed=ch.counter;return`Договорились, ${fmt(ch.counter)}. Оформляйте`}
+if(n>=100){if(n>=l.price){ch.agreed=l.price;return`Хорошо, ${fmt(l.price)}, всё в силе`}const r=n/l.price;
+if(r>=thr){ch.agreed=n;return P([`Ладно, ${fmt(n)} — забирайте`,`Давайте ${fmt(n)}, уговорили`])}
+if(r<.55)return P(['Это несерьёзно','За такую цену не отдам','Вы шутите?']);
+const c=r50(Math.max(l.price*thr*1.01,(n+l.price)/2));ch.counter=c;return`Ниже ${fmt(c)} не могу`+(tr=='greedy'?', и так дёшево отдаю':'')}
+if(/дешевле|видел/.test(t))return tr=='newbie'?(ch.counter=r50(l.price*.88),`Ой, правда? Ну давайте ${fmt(ch.counter)}`):P(['Ну так и берите там','Не верю, покажите ссылку']);
+if(/состо|недост|дефект|проблем|царап|трещ|ремонт|вскры|залит/.test(t))return tr=='honest'?(l.defs.length?'Есть такое: '+l.defs.map(i=>DEF[i][0].toLowerCase()).join(', '):'Всё в порядке, без недостатков'):tr=='scam'?P(['Всё идеально, как в описании','Да там всё отлично, не переживайте']):tr=='newbie'?'Ну я не очень разбираюсь, вроде нормально работает':`Как в объявлении: ${l.cc}/10`;
+if(/провер/.test(t))return tr=='scam'?P(['Да зачем, я же всё написал. Другие уже ждут','Некогда мне, берёте или нет?']):'Да пожалуйста, проверяйте';
+if(/привет|здрав|добр/.test(t))return P(['Здравствуйте','Привет, слушаю','Добрый день, актуально']);
+if(/актуал|есть/.test(t))return'Да, актуально';
+return P(['Понял','Что именно интересует?','Предложите свою цену','Да, слушаю'])}
+function buyerReply(ch,x,l,s){const t=x.toLowerCase(),n=num(t);if(!l){ch.closed=1;return'Понял, спасибо'}
+if(ch.offer&&/(^|\s)(ок|окей|согласен|давай|по рукам|договорились)/.test(t)){ch.deal=ch.offer;return`Хорошо, ${fmt(ch.offer)} — беру`}
+if(n>=100){if(n<=ch.max){ch.deal=n;return`Хорошо, беру за ${fmt(n)}`}
+if(n>ch.max*1.2&&Math.random()<.4){ch.closed=1;return'Дороговато, поищу другое'}
+ch.offer=r50(Math.min(ch.max,((ch.offer||ch.max*.85)+n)/2));return`Максимум ${fmt(ch.offer)}, больше не дам`}
+if(/состо|недост|дефект|идеал/.test(t))return P(['Понял, на встрече посмотрю','А проверить можно будет?','Хорошо']);
+return P(['Ок','Понял','Так что по цене?'])}
+function buyerStart(l){const s=P(S.sel),fv=fair(l.base,l.cc,l.cd)*S.mk*(.92+(myRate()||4)/60),mx=fv*R(.82,1.02)*(s.tr=='newbie'?1.1:s.tr=='pro'?.95:1);
+const ch={id:S.uid++,lid:l.id,w:s.id,role:'b',msgs:[],max:mx,unread:0,agreed:0};let m;
+if(l.price<=mx){ch.deal=l.price;m=`Здравствуйте! Беру ${l.mo} за ${fmt(l.price)}`}
+else{ch.offer=r50(mx*R(.8,.95));m=s.tr=='scam'?`Привет. На фото вижу сколы, дам ${fmt(ch.offer)}`:`Добрый день, актуально? Отдадите за ${fmt(ch.offer)}?`}
+setTimeout(()=>{S.chats.push(ch);deliver(ch,toneT(m,s))},RI(1500,5000))}
+function sendMsg(txt){txt=(txt||$('#ci').value).trim();if(!txt)return;const ch=S.chats.find(c=>c.id==openChat);if(!ch||ch.closed)return;
+ch.msgs.push({f:'m',t:txt});const l=LST(ch.lid),s=SEL(ch.w);
+const r=ch.role=='b'?buyerReply(ch,txt,l,s):sellerReply(ch,txt,l,s);save();render();deliver(ch,typo(toneT(r,s)))}
+/* ===== МОДУЛЬ 6: СДЕЛКИ ===== */
+const priceOf=l=>{const c=S.chats.find(c=>c.lid==l.id&&c.agreed);return c?c.agreed:l.price};
+function addHist(t,txt,amt,sid,extra){S.hist.unshift({t,txt,amt,sid,ts:Date.now(),rv:0,...extra})}
+function checkout(){let tot=0;const ids=[...S.cart];for(const id of ids){const l=LST(id);if(!l)continue;const p=priceOf(l),s=SEL(l.sid);
+if(S.bal<p){toast('Не хватает денег на '+l.mo);continue}
+if(lied(l)&&!S.insp[l.id]&&Math.random()<.5){ // разоблачение продавца
+ const c=Math.round(p*PEN);S.bal+=c;S.profit+=c;s.rv.push({n:S.name,s:1,t:'Продавец обманул с состоянием'});addHist('fraud','Продавец солгал — сделка отменена, штраф продавцу: '+l.mo,c,s.id);S.L=S.L.filter(x=>x.id!=id);toast('Обман раскрыт! Сделка отменена, +'+fmt(c));continue}
+S.bal-=p;S.inv.push({id:l.id,br:l.br,mo:l.mo,base:l.base,real:l.real,defs:l.defs,cost:p});
+const r=p/l.price;s.rv.push({n:S.name,s:0,t:''});s.rv.pop();
+addHist('buy','Куплено: '+l.mo,-p,s.id);S.L=S.L.filter(x=>x.id!=id);tot+=p}
+S.cart=[];save();hdr();render();if(tot)toast('Покупка на '+fmt(tot)+'. Телефон в «Моих»')}
+function sellDeal(cid){const ch=S.chats.find(c=>c.id==cid),l=LST(ch.lid),it=l&&l.it;if(!l||!ch.deal)return;const p=ch.deal,b=SEL(ch.w),lie=lied(l);
+const pi=Math.min(.85,.08+p/120000+(b.tr=='pro'?.2:0)),insp=Math.random()<pi;let st,tx;
+S.mine=S.mine.filter(x=>x.id!=l.id);S.chats.forEach(c=>{if(c.lid==l.id)c.closed=1});
+if(lie&&insp){S.inv.push(it);S.rev.push({n:b.n,s:2,t:'Состояние не соответствует описанию'});addHist('lose','Покупатель проверил телефон, увидел ложь — сделка отменена: '+l.mo,0,b.id);toast('Покупатель проверил телефон и отказался')}
+else if(lie&&Math.random()<.5){const pen=Math.min(S.bal,Math.round(p*PEN));S.bal-=pen;S.inv.push(it);S.rev.push({n:b.n,s:1,t:'Обманул, телефон не такой как в объявлении'});addHist('lose','Ваш обман раскрыт! Штраф: '+l.mo,-pen,b.id);toast('Обман раскрыт! Штраф '+fmt(pen))}
+else{S.bal+=p;const pr=p-it.cost;S.profit+=pr;S.sold++;st=lie?RI(3,5):(p<=fair(l.base,l.cc,l.cd)*S.mk*1.05?5:4);S.rev.push({n:b.n,s:st,t:st>=5?P(GOOD):'Нормально, но цена высоковата'});addHist('sell','Продано: '+l.mo,p,b.id,{profit:pr});toast('Продано за '+fmt(p))}
+save();hdr();render()}
+function rate(i,st){const h=S.hist[i];if(!h||h.rv)return;const t=prompt('Текст отзыва (необязательно)')||'';h.rv=st;SEL(h.sid).rv.push({n:S.name,s:st,t:t||'—'});save();render()}
+function inspect(id){const l=LST(id),c=Math.max(100,Math.round(l.price*.1));if(S.insp[id]){report(l,0);return}
+if(S.bal<c)return toast('Проверка стоит '+fmt(c));if(!confirm('Проверка стоит '+fmt(c)+'. Провести?'))return;S.bal-=c;S.insp[id]=1;save();hdr();report(l,c)}
+function report(l,c){const fp=fair(l.base,l.real,l.defs)*S.mk;modal(`<h3>Отчёт о проверке</h3><div class="m">${esc(l.mo)}${c?' · списано '+fmt(c):''}</div><p>Реальное состояние: <b class="${l.real<l.cc?'bad':'ok'}">${l.real}/10</b> (заявлено ${l.cc}/10)</p><p>Неисправности:</p>${l.defs.length?l.defs.map(i=>`<span class="tag">${DEF[i][0]}</span>`).join(''):'<span class="ok">нет</span>'}<p>Справедливая цена: <b>${fmt(fp)}</b> (в объявлении ${fmt(l.price)})</p><button class="b" onclick="modal()">Закрыть</button>`)}
+/* ===== МОДУЛЬ 7: ИНТЕРФЕЙС ===== */
+const toast=t=>{const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)};
+function modal(h){const m=$('#md');if(!h){m.classList.remove('on');return}m.innerHTML='<div>'+h+'</div>';m.classList.add('on')}
+$('#md').onclick=e=>{if(e.target.id=='md')modal()};
+function hdr(){$('#hb').textContent=fmt(S.bal);$('#hs').textContent='День '+S.day+' · '+(myRate()?'★ '+myRate().toFixed(1):'нет оценок');const u=S.chats.reduce((a,c)=>a+(c.unread||0),0);
+$('#nv').innerHTML=[['feed','🏠','Лента'],['cart','🛒','Корзина',S.cart.length],['mine','📦','Моё'],['chats','💬','Чаты',u],['me','👤','Профиль']].map(([k,i,n,b])=>`<button class="${view==k?'on':''}" onclick="go('${k}')"><span>${i}</span>${n}${b?`<i class="bd">${b}</i>`:''}</button>`).join('')}
+function go(v){view=v;openChat=null;render()}
+function render(){hdr();const m=$('#mn');({feed:feedV,cart:cartV,mine:mineV,chats:chatsV,me:meV})[view](m);if(view=='chats'&&openChat){const e=$('.msgs');if(e)e.scrollTop=1e9}}
+function feedV(m){m.innerHTML=`<div class="bar"><input id="fq" placeholder="Поиск: модель, бренд…" value="${esc(f.q)}"><select id="fs"><option value="new">Новые</option><option value="pa">Цена ↑</option><option value="pd">Цена ↓</option><option value="c">Состояние</option><option value="r">Рейтинг продавца</option></select></div>
+<div class="bar"><select id="fb"><option value="">Все бренды</option>${Object.keys(BR).map(b=>`<option>${b}</option>`).join('')}</select><input id="fmin" type="number" placeholder="Цена от" style="width:100px" value="${f.min}"><input id="fmax" type="number" placeholder="до" style="width:100px" value="${f.max}"><select id="fc">${[1,3,5,6,8,9].map(c=>`<option value="${c}">Состояние ≥ ${c}</option>`).join('')}</select><label class="m row"><input type="checkbox" id="fnd" ${f.nd?'checked':''}>без недостатков</label></div><div class="grid" id="ls"></div>`;
+$('#fs').value=f.s;$('#fb').value=f.b;$('#fc').value=f.c;
+['fq','fs','fb','fmin','fmax','fc','fnd'].forEach(i=>$('#'+i).oninput=()=>{f={q:$('#fq').value,s:$('#fs').value,b:$('#fb').value,min:$('#fmin').value,max:$('#fmax').value,c:+$('#fc').value,nd:$('#fnd').checked};list()});list()}
+function list(){const e=$('#ls');if(!e)return;const q=f.q.toLowerCase();let a=S.L.filter(l=>(!q||(l.br+' '+l.mo).toLowerCase().includes(q))&&(!f.b||l.br==f.b)&&(!f.min||l.price>=+f.min)&&(!f.max||l.price<=+f.max)&&l.cc>=f.c&&(!f.nd||!l.cd.length));
+const so={new:(x,y)=>y.ts-x.ts,pa:(x,y)=>x.price-y.price,pd:(x,y)=>y.price-x.price,c:(x,y)=>y.cc-x.cc,r:(x,y)=>srate(SEL(y.sid))-srate(SEL(x.sid))};a.sort(so[f.s]);
+e.innerHTML=a.map(l=>`<div class="card it" onclick="card(${l.id})"><div class="ph">${pic(l)}</div><div class="pr">${fmt(l.price)}</div><div>${esc(l.br)} ${esc(l.mo)}</div><div class="m">Состояние ${l.cc}/10 · ${esc(SEL(l.sid).n)} <span class="st">${stars(srate(SEL(l.sid)))}</span></div>${l.cd.slice(0,2).map(i=>`<span class="tag">${DEF[i][0]}</span>`).join('')}</div>`).join('')||'<p class="m">Ничего не найдено</p>'}
+function card(id){const l=LST(id);if(!l)return modal();const s=SEL(l.sid),i=S.insp[id];
+modal(`<div class="ph" style="height:170px">${pic(l)}</div><h3 style="margin:4px 0">${esc(l.br)} ${esc(l.mo)}</h3><div class="pr">${fmt(l.price)}</div><p>Заявленное состояние: <b>${l.cc}/10</b></p><p>${l.cd.length?l.cd.map(d=>`<span class="tag">${DEF[d][0]}</span>`).join(''):'<span class="ok">Недостатки не заявлены</span>'}</p><p class="m">${esc(l.desc)}</p>
+${i?`<p class="${l.real<l.cc?'bad':'ok'}">Проверено: реально ${l.real}/10</p>`:''}
+<div class="row">${av(s.n)}<div><b>${esc(s.n)}</b><div class="st">${stars(srate(s))} <span class="m">${srate(s).toFixed(1)} · ${s.rv.length} отзывов</span></div></div></div>
+<div class="m" style="margin:6px 0">${s.rv.slice(-3).map(r=>`${esc(r.n)}: ${stars(r.s)} ${esc(r.t)}`).join('<br>')}</div>
+<div class="row" style="flex-wrap:wrap"><button class="b" onclick="addCart(${id})">В корзину</button><button class="b s" onclick="openC(${id})">Написать продавцу</button><button class="b s" onclick="inspect(${id})">Проверить телефон (${fmt(Math.max(100,l.price*.1))})</button></div>`)}
+/* Иллюстрация телефона: цвет и камеры зависят от бренда/модели, дефекты рисуются поверх */
+function pic(l){const h=hue(l.br),d=S.insp[l.id]?l.defs:l.cd,m=hue(l.mo)%3,k='fill="#111" stroke="#999" stroke-width=".8"';
+const cam=l.br=='lPhone'?`<rect x="18" y="10" width="30" height="30" rx="8" fill="#0006"/><circle cx="27" cy="19" r="5" ${k}/><circle cx="39" cy="19" r="5" ${k}/><circle cx="33" cy="31" r="5" ${k}/>`:m==0?`<circle cx="33" cy="22" r="12" fill="#0006"/><circle cx="33" cy="22" r="7" ${k}/>`:`<rect x="18" y="10" width="16" height="36" rx="8" fill="#0006"/><circle cx="26" cy="19" r="5" ${k}/><circle cx="26" cy="36" r="5" ${k}/>`;
+const fx=(d.includes(0)?'<path d="M52 60 L40 80 L48 92 M40 80 L28 88 L33 112" stroke="#fffd" stroke-width="1" fill="none"/>':'')+(d.includes(7)?'<path d="M20 70 L44 84 M24 96 L52 88 M30 60 L58 66" stroke="#fff6" stroke-width=".7"/>':'')+(d.includes(8)?'<ellipse cx="60" cy="20" rx="4" ry="6" fill="#0008"/>':'')+(d.includes(9)?'<circle cx="30" cy="100" r="10" fill="#4a90e233"/><circle cx="48" cy="88" r="7" fill="#4a90e233"/>':'')+(d.includes(1)||d.includes(2)?'<rect x="54" y="110" width="5" height="5" fill="#f55a"/>':'');
+return`<svg viewBox="0 0 80 130" style="height:100%;filter:saturate(${l.cc<=3?.5:1})"><defs><linearGradient id="g${l.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h} 45% 48%)"/><stop offset="1" stop-color="hsl(${(h+40)%360} 45% 26%)"/></linearGradient></defs><rect x="12" y="3" width="56" height="124" rx="10" fill="url(#g${l.id})" stroke="#fff3"/>${cam}<text x="40" y="120" font-size="6" fill="#fffb" text-anchor="middle">${esc(l.br)}</text>${fx}</svg>`}
+function addCart(id){if(!S.cart.includes(id))S.cart.push(id);save();modal();hdr();toast('Добавлено в корзину')}
+function openC(lid){const l=LST(lid);let ch=S.chats.find(c=>c.lid==lid&&c.role=='s');if(!ch){ch={id:S.uid++,lid,w:l.sid,role:'s',msgs:[],agreed:0,unread:0};S.chats.push(ch)}modal();view='chats';openChat=ch.id;save();render()}
+function cartV(m){const a=S.cart.map(LST).filter(Boolean),t=a.reduce((s,l)=>s+priceOf(l),0);
+m.innerHTML=`<h3>Корзина</h3>${a.map(l=>`<div class="card row sp" style="margin-bottom:8px"><div>${esc(l.mo)}<div class="m">${esc(SEL(l.sid).n)}${priceOf(l)<l.price?' · цена по договорённости':''}</div></div><div class="row"><b>${fmt(priceOf(l))}</b><button class="b s" onclick="S.cart=S.cart.filter(x=>x!=${l.id});render()">✕</button></div></div>`).join('')||'<p class="m">Корзина пуста</p>'}${a.length?`<div class="row sp"><b>Итого: ${fmt(t)}</b><button class="b g" onclick="checkout()">Оформить</button></div>${t>S.bal?'<p class="bad">Недостаточно средств на балансе</p>':''}`:''}`}
+function mineV(m){m.innerHTML=`<h3>Инвентарь</h3><div class="grid">${S.inv.map((it,i)=>`<div class="card"><b>${esc(it.mo)}</b><div class="m">Куплен за ${fmt(it.cost)}<br>Реально: ${it.real}/10</div>${it.defs.map(d=>`<span class="tag">${DEF[d][0]}</span>`).join('')||'<span class="ok m">без недостатков</span>'}<div style="margin-top:8px"><button class="b" onclick="sellForm(${i})">Выставить</button></div></div>`).join('')||'<p class="m">Пусто. Купите телефон на Барахолке.</p>'}</div>
+<h3>Мои объявления</h3><div class="grid">${S.mine.map(l=>`<div class="card"><b>${esc(l.mo)}</b><div class="pr">${fmt(l.price)}</div><div class="m">Заявлено ${l.cc}/10 · чатов: ${S.chats.filter(c=>c.lid==l.id).length}</div><button class="b s" onclick="unlist(${l.id})">Снять</button></div>`).join('')||'<p class="m">Нет активных объявлений</p>'}</div>`}
+function sellForm(i){const it=S.inv[i];window._i=i;modal(`<h3>Новое объявление: ${esc(it.mo)}</h3><div class="col"><label>Заявленное состояние: <b id="cv">${it.real}</b>/10<input type="range" min="1" max="10" value="${it.real}" id="sc" style="width:100%"></label><div class="m">Заявленные недостатки:</div><div>${DEF.map((d,j)=>`<label style="display:inline-block;margin:2px 8px 2px 0"><input type="checkbox" class="sd" value="${j}" ${it.defs.includes(j)?'checked':''}> ${d[0]}</label>`).join('')}</div><label>Цена, ₽<input type="number" id="sp" style="width:100%"></label><button class="b g" onclick="mkAd()">Опубликовать</button></div>`);
+const up=()=>{$('#cv').textContent=$('#sc').value;$('#sp').value=r50(fair(it.base,+$('#sc').value,[...document.querySelectorAll('.sd:checked')].map(x=>+x.value))*S.mk)};$('#sc').oninput=up;document.querySelectorAll('.sd').forEach(x=>x.onchange=up);up()}
+function mkAd(){const it=S.inv[_i],cc=+$('#sc').value,cd=[...document.querySelectorAll('.sd:checked')].map(x=>+x.value),price=+$('#sp').value;if(price<100)return toast('Укажите цену');
+S.inv.splice(_i,1);S.mine.push({id:it.id,sid:0,br:it.br,mo:it.mo,base:it.base,real:it.real,defs:it.defs,cc,cd,price,own:1,it,ts:Date.now(),desc:''});save();modal();render();toast('Объявление опубликовано — ждите сообщений')}
+function unlist(id){const l=S.mine.find(x=>x.id==id);S.inv.push(l.it);S.mine=S.mine.filter(x=>x.id!=id);S.chats.forEach(c=>{if(c.lid==id)c.closed=1});save();render()}
+function chatsV(m){if(openChat)return chatV(m);const a=S.chats.filter(c=>c.msgs.length).sort((x,y)=>y.id-x.id);
+m.innerHTML='<h3>Чаты</h3>'+(a.map(c=>{const s=SEL(c.w),l=LST(c.lid);return`<div class="card row" style="margin-bottom:8px;cursor:pointer" onclick="openChat=${c.id};render()">${av(s.n)}<div style="flex:1"><b>${esc(s.n)}</b><div class="m">${l?esc(l.mo):'объявление снято'} · ${esc(c.msgs.at(-1).t.slice(0,40))}</div></div>${c.unread?`<i class="bd" style="position:static">${c.unread}</i>`:''}</div>`}).join('')||'<p class="m">Чатов пока нет</p>')}
+function chatV(m){const ch=S.chats.find(c=>c.id==openChat);if(!ch){openChat=null;return chatsV(m)}ch.unread=0;const l=LST(ch.lid),s=SEL(ch.w),b=ch.role=='b';
+const base=l?l.price:0,chips=b?['Цена окончательная',`Отдам за ${r50(base*.95)}`,'Телефон в идеале']:['Какое состояние?','Есть недостатки?',`Отдадите за ${r50(base*.85)}?`,'Можно проверить?','Видел такой дешевле','Ок, согласен'];
+m.innerHTML=`<div class="row" style="margin-bottom:8px"><button class="b s" onclick="openChat=null;render()">←</button>${av(s.n)}<div><b>${esc(s.n)}</b><div class="m">${typing[ch.id]?'печатает…':'в сети'} · ${l?esc(l.mo)+' · '+fmt(l.price):'снято'}</div></div></div>
+<div class="card"><div class="msgs">${ch.msgs.map(x=>`<div class="bu ${x.f=='m'?'me':''}">${esc(x.t)}</div>`).join('')||'<div class="m">Напишите первым</div>'}</div>
+${ch.closed?'<div class="m">Диалог завершён</div>':`<div class="row" style="flex-wrap:wrap;margin:6px 0">${chips.map(c=>`<button class="chip" onclick="sendMsg(this.textContent)">${esc(c)}</button>`).join('')}</div><div class="row"><input id="ci" style="flex:1" placeholder="Сообщение…" onkeydown="if(event.key=='Enter')sendMsg()"><button class="b" onclick="sendMsg()">➤</button></div>`}
+<div class="row" style="flex-wrap:wrap;margin-top:8px">${b&&ch.deal&&l?`<button class="b g" onclick="sellDeal(${ch.id})">Продать за ${fmt(ch.deal)}</button>`:''}${!b&&l?`<button class="b s" onclick="addCart(${l.id});go('cart')">В корзину ${ch.agreed?'за '+fmt(ch.agreed):''}</button><button class="b s" onclick="inspect(${l.id})">Проверить</button>`:''}</div></div>`}
+function meV(m){const nw=S.bal+S.inv.reduce((a,i)=>a+fair(i.base,i.real,i.defs)*S.mk,0);
+m.innerHTML=`<div class="card row">${av(S.name)}<div><b>${esc(S.name)}</b><div class="st">${myRate()?stars(myRate())+' '+myRate().toFixed(1):'пока без отзывов'}</div></div></div>
+<div class="grid" style="margin:10px 0"><div class="card"><div class="m">Баланс</div><div class="pr ok">${fmt(S.bal)}</div></div><div class="card"><div class="m">Прибыль</div><div class="pr ${S.profit>=0?'ok':'bad'}">${fmt(S.profit)}</div></div><div class="card"><div class="m">Продаж</div><div class="pr">${S.sold}</div></div><div class="card"><div class="m">Капитал (с товаром)</div><div class="pr">${fmt(nw)}</div></div></div>
+<h3>Отзывы обо мне</h3>${S.rev.slice(-6).reverse().map(r=>`<div class="card" style="margin-bottom:6px"><b>${esc(r.n)}</b> <span class="st">${stars(r.s)}</span><div class="m">${esc(r.t)}</div></div>`).join('')||'<p class="m">Пока нет</p>'}
+<h3>История сделок</h3>${S.hist.slice(0,30).map((h,i)=>`<div class="card row sp" style="margin-bottom:6px"><div>${esc(h.txt)}<div class="m">${new Date(h.ts).toLocaleTimeString('ru-RU')} · ${esc(SEL(h.sid).n)}</div></div><div style="text-align:right"><b class="${h.amt>=0?'ok':'bad'}">${h.amt>=0?'+':''}${fmt(h.amt)}</b>${(h.t=='buy'||h.t=='sell')&&!h.rv?`<div>${[1,2,3,4,5].map(n=>`<button class="chip" onclick="rate(${i},${n})">${n}★</button>`).join('')}</div>`:''}</div></div>`).join('')||'<p class="m">Сделок нет</p>'}
+<button class="b r" style="margin-top:12px" onclick="if(confirm('Начать заново?')){localStorage.removeItem('bobo1');init();go('feed')}">Сбросить игру</button>`}
+/* ===== МОДУЛЬ 8: МУЛЬТИПЛЕЕР (заглушка) =====
+ Реальные игроки подключаются через Net (WebSocket/Firebase): Net.publish(listing), Net.onMessage(chatId,cb), Net.send(chatId,text).
+ Без бэкенда «другие игроки» имитируются теми же персонажами рынка — для игрока различий нет. */
+S=load();if(!S)init();render();setInterval(tick,12000);
+</script></body></html>
