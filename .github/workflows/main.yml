@@ -27,9 +27,13 @@ jobs:
             sed -i 's/<string name="title_activity_main">[^<]*<\/string>/<string name="title_activity_main">BoboPhone<\/string>/g' android/app/src/main/res/values/strings.xml
           fi
 
-          # 2. Делаем иконку из logo.jpg / logo.jpeg / logo.png
-          if [ -f "logo.jpg" ]; then convert logo.jpg logo.png; fi
-          if [ -f "logo.jpeg" ]; then convert logo.jpeg logo.png; fi
+          # 2. Делаем иконку из logo.jpg / logo.jpeg / logo.png через Python
+          if [ -f "logo.jpg" ]; then
+            python3 -c "from PIL import Image; Image.open('logo.jpg').convert('RGBA').save('logo.png')"
+          fi
+          if [ -f "logo.jpeg" ]; then
+            python3 -c "from PIL import Image; Image.open('logo.jpeg').convert('RGBA').save('logo.png')"
+          fi
           if [ -f "logo.png" ]; then
             mkdir -p assets
             cp logo.png assets/icon-only.png
