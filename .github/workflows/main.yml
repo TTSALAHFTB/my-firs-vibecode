@@ -18,7 +18,7 @@ jobs:
       - name: Configure app, icons, assets and sync
         run: |
           npm install
-          npm install @capacitor/assets --save-dev
+          npm install @capacitor/assets sharp --save-dev
 
           # 1. Меняем название приложения на BoboPhone
           sed -i 's/"appName": *"[^"]*"/"appName": "BoboPhone"/g' capacitor.config.json
@@ -27,12 +27,12 @@ jobs:
             sed -i 's/<string name="title_activity_main">[^<]*<\/string>/<string name="title_activity_main">BoboPhone<\/string>/g' android/app/src/main/res/values/strings.xml
           fi
 
-          # 2. Делаем иконку из logo.jpg / logo.jpeg / logo.png через Python
+          # 2. Конвертируем logo.jpg / logo.jpeg в logo.png через Node.js (sharp)
           if [ -f "logo.jpg" ]; then
-            python3 -c "from PIL import Image; Image.open('logo.jpg').convert('RGBA').save('logo.png')"
+            node -e "require('sharp')('logo.jpg').png().toFile('logo.png')"
           fi
           if [ -f "logo.jpeg" ]; then
-            python3 -c "from PIL import Image; Image.open('logo.jpeg').convert('RGBA').save('logo.png')"
+            node -e "require('sharp')('logo.jpeg').png().toFile('logo.png')"
           fi
           if [ -f "logo.png" ]; then
             mkdir -p assets
@@ -71,3 +71,4 @@ jobs:
         with:
           name: BoboPhone
           path: android/app/build/outputs/apk/debug/BoboPhone.apk
+
