@@ -15,16 +15,22 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install dependencies and sync
+      - name: Fix config and sync
         run: |
           npm install
+          if [ -d "www" ]; then
+            sed -i 's/"ww"/"www"/g' capacitor.config.json
+          elif [ ! -d "ww" ]; then
+            mkdir -p ww
+            if [ -f "index.html" ]; then cp index.html ww/; fi
+          fi
           npx cap sync android
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Build Debug APK
         run: |
