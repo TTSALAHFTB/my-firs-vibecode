@@ -25,6 +25,19 @@ input,select,textarea{background:var(--c2);color:var(--t);border:1px solid #2f3a
 .chip{background:var(--c2);border:0;color:var(--t);border-radius:14px;padding:5px 10px;font-size:12px;cursor:pointer}
 #toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--a);padding:8px 14px;border-radius:12px;z-index:30;display:none}
 .ok{color:var(--g)}.bad{color:var(--r)}.st{color:var(--y)}
+/* анимации */
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes fade{from{opacity:0}}@keyframes fadeo{to{opacity:0}}@keyframes sheet{from{opacity:0;transform:translateY(40px) scale(.97)}}@keyframes sheeto{to{opacity:0;transform:translateY(40px)}}@keyframes pop{from{opacity:0;transform:scale(.85) translateY(6px)}}@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}@keyframes drop{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}@keyframes bump{30%{transform:scale(1.35) rotate(-8deg)}60%{transform:scale(.9)}}@keyframes fu{30%{color:#7dffb0;text-shadow:0 0 14px var(--g);transform:scale(1.2)}}@keyframes fd{20%,60%{transform:translateX(-4px);color:var(--r)}40%,80%{transform:translateX(4px);color:var(--r)}}@keyframes fl{50%{transform:translateY(-6px)}}@keyframes winpop{0%{transform:scale(.3) rotate(-10deg);opacity:0}60%{transform:scale(1.12)}100%{transform:none}}@keyframes cf{from{transform:translateY(-10vh) rotate(0)}to{transform:translateY(105vh) rotate(720deg)}}
+body{animation:fade .5s}#hb{display:inline-block}#hb.fu{animation:fu .6s}#hb.fd{animation:fd .5s}
+#mn.vt>*,#mn.vt .grid>*{animation:up .4s cubic-bezier(.2,.8,.3,1) both}#mn.vt .grid>*{animation-delay:calc(var(--n,0)*45ms)}
+.b,.chip,nav button{transition:transform .12s,filter .15s}.b:active,.chip:active,nav button:active{transform:scale(.92)}.b:hover{filter:brightness(1.15)}
+.it{transition:transform .2s,border-color .2s}.it:hover{transform:translateY(-3px);border-color:var(--a)}.sw,.it{touch-action:pan-y;user-select:none}
+nav button span{transition:transform .25s}nav button.on span{transform:translateY(-3px) scale(1.2)}.bd{animation:pop .3s}nav button.bump span{animation:bump .5s}
+#md.on{animation:fade .2s}#md.on>div{animation:sheet .32s cubic-bezier(.2,.9,.3,1.1)}#md.out{animation:fadeo .18s forwards}#md.out>div{animation:sheeto .18s forwards}#md .ph svg{animation:fl 3s ease-in-out infinite}.win{animation:winpop .6s both;box-shadow:0 0 30px #7c5cff66}
+.grab{display:block;width:44px;height:21px;margin:-8px auto 4px;padding:8px 0;background:#fff3;background-clip:content-box;border-radius:3px;touch-action:none;cursor:grab}
+.bu.new{animation:pop .25s}.ty i{font-style:normal;font-size:8px;animation:blink 1s infinite}.ty i:nth-child(2){animation-delay:.2s}.ty i:nth-child(3){animation-delay:.4s}#toast{animation:drop .3s}
+.reel{position:relative;overflow:hidden;border-radius:12px;background:var(--c2);padding:10px 0;margin:10px 0}.strip{display:flex;will-change:transform}.rc{flex:none;width:90px;margin-right:8px;background:var(--c);border-radius:10px;padding:6px;text-align:center;border-bottom:3px solid #4a90e2}.rc.r{border-color:#a855f7}.rc.e{border-color:var(--y)}.rc small{display:block;font-size:10px;color:var(--m);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.mark{position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--y);z-index:2;box-shadow:0 0 12px var(--y)}
+.cf{position:fixed;top:0;width:8px;height:12px;z-index:40;pointer-events:none;animation:cf 2s linear forwards}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style></head><body>
 <header><div class="logo">Bobo<b>Phone</b> <span class="sub">Барахолка</span></div><div style="text-align:right"><div class="bal" id="hb"></div><div class="sub" id="hs"></div></div></header>
 <main id="mn"></main><div id="md"></div><div id="toast"></div>
@@ -50,9 +63,9 @@ const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
 const av=n=>`<span class="av" style="background:hsl(${hue(n)} 45% 42%)">${esc(n[0].toUpperCase())}</span>`; // одинаковый вид для всех
 const stars=r=>'★'.repeat(Math.round(r))+'☆'.repeat(5-Math.round(r));
 /* ===== МОДУЛЬ 3: СОСТОЯНИЕ И СОХРАНЕНИЕ ===== */
-let S,view='feed',openChat=null,typing={},f={q:'',b:'',min:'',max:'',c:1,nd:false,s:'new'};
-const save=()=>{try{localStorage.setItem('bobo1',JSON.stringify(S))}catch(e){}};
-const load=()=>{try{return JSON.parse(localStorage.getItem('bobo1'))}catch(e){return null}};
+let ACC=null,started=0,S,view='feed',openChat=null,typing={},f={q:'',b:'',min:'',max:'',c:1,nd:false,s:'new'};
+const save=()=>{if(ACC)try{localStorage.setItem('bobo_u_'+ACC,JSON.stringify(S))}catch(e){}}; // гость не сохраняется
+const load=()=>{try{return JSON.parse(localStorage.getItem('bobo_u_'+ACC))}catch(e){return null}};
 const SEL=id=>S.sel.find(s=>s.id==id),LST=id=>S.L.find(l=>l.id==id)||S.mine.find(l=>l.id==id);
 const srate=s=>s.rv.length?s.rv.reduce((a,r)=>a+r.s,0)/s.rv.length:4;
 const myRate=()=>S.rev.length?S.rev.reduce((a,r)=>a+r.s,0)/S.rev.length:0;
@@ -103,7 +116,7 @@ if(n>ch.max*1.2&&Math.random()<.4){ch.closed=1;return'Дороговато, по
 ch.offer=r50(Math.min(ch.max,((ch.offer||ch.max*.85)+n)/2));return`Максимум ${fmt(ch.offer)}, больше не дам`}
 if(/состо|недост|дефект|идеал/.test(t))return P(['Понял, на встрече посмотрю','А проверить можно будет?','Хорошо']);
 return P(['Ок','Понял','Так что по цене?'])}
-function buyerStart(l){const s=P(S.sel),fv=fair(l.base,l.cc,l.cd)*S.mk*(.92+(myRate()||4)/60),mx=fv*R(.82,1.02)*(s.tr=='newbie'?1.1:s.tr=='pro'?.95:1);
+function buyerStart(l){const s=P(S.sel),fv=fair(l.base,l.cc,l.cd)*S.mk*(l.cp?.25:1)*(.92+(myRate()||4)/60),mx=fv*R(.82,1.02)*(s.tr=='newbie'?1.1:s.tr=='pro'?.95:1);
 const ch={id:S.uid++,lid:l.id,w:s.id,role:'b',msgs:[],max:mx,unread:0,agreed:0};let m;
 if(l.price<=mx){ch.deal=l.price;m=`Здравствуйте! Беру ${l.mo} за ${fmt(l.price)}`}
 else{ch.offer=r50(mx*R(.8,.95));m=s.tr=='scam'?`Привет. На фото вижу сколы, дам ${fmt(ch.offer)}`:`Добрый день, актуально? Отдадите за ${fmt(ch.offer)}?`}
@@ -122,11 +135,12 @@ S.bal-=p;S.inv.push({id:l.id,br:l.br,mo:l.mo,base:l.base,real:l.real,defs:l.defs
 const r=p/l.price;s.rv.push({n:S.name,s:0,t:''});s.rv.pop();
 addHist('buy','Куплено: '+l.mo,-p,s.id);S.L=S.L.filter(x=>x.id!=id);tot+=p}
 S.cart=[];save();hdr();render();if(tot)toast('Покупка на '+fmt(tot)+'. Телефон в «Моих»')}
-function sellDeal(cid){const ch=S.chats.find(c=>c.id==cid),l=LST(ch.lid),it=l&&l.it;if(!l||!ch.deal)return;const p=ch.deal,b=SEL(ch.w),lie=lied(l);
+function sellDeal(cid){const ch=S.chats.find(c=>c.id==cid),l=LST(ch.lid),it=l&&l.it;if(!l||!ch.deal)return;const p=ch.deal,b=SEL(ch.w),lie=lied(l)||!!l.fk;
 const pi=Math.min(.85,.08+p/120000+(b.tr=='pro'?.2:0)),insp=Math.random()<pi;let st,tx;
 S.mine=S.mine.filter(x=>x.id!=l.id);S.chats.forEach(c=>{if(c.lid==l.id)c.closed=1});
 if(lie&&insp){S.inv.push(it);S.rev.push({n:b.n,s:2,t:'Состояние не соответствует описанию'});addHist('lose','Покупатель проверил телефон, увидел ложь — сделка отменена: '+l.mo,0,b.id);toast('Покупатель проверил телефон и отказался')}
-else if(lie&&Math.random()<.5){const pen=Math.min(S.bal,Math.round(p*PEN));S.bal-=pen;S.inv.push(it);S.rev.push({n:b.n,s:1,t:'Обманул, телефон не такой как в объявлении'});addHist('lose','Ваш обман раскрыт! Штраф: '+l.mo,-pen,b.id);toast('Обман раскрыт! Штраф '+fmt(pen))}
+else if(l.fk&&Math.random()<.45){const pen=Math.round(S.bal*.5);S.bal-=pen;S.rev.push({n:b.n,s:1,t:'Продал подделку за оригинал'});addHist('lose','Подделка раскрыта, телефон изъят! Штраф 50% баланса: '+l.mo,-pen,b.id);toast('Подделку поймали! Штраф '+fmt(pen))}
+else if(lied(l)&&Math.random()<.5){const pen=Math.min(S.bal,Math.round(p*PEN));S.bal-=pen;S.inv.push(it);S.rev.push({n:b.n,s:1,t:'Обманул, телефон не такой как в объявлении'});addHist('lose','Ваш обман раскрыт! Штраф: '+l.mo,-pen,b.id);toast('Обман раскрыт! Штраф '+fmt(pen))}
 else{S.bal+=p;const pr=p-it.cost;S.profit+=pr;S.sold++;st=lie?RI(3,5):(p<=fair(l.base,l.cc,l.cd)*S.mk*1.05?5:4);S.rev.push({n:b.n,s:st,t:st>=5?P(GOOD):'Нормально, но цена высоковата'});addHist('sell','Продано: '+l.mo,p,b.id,{profit:pr});toast('Продано за '+fmt(p))}
 save();hdr();render()}
 function rate(i,st){const h=S.hist[i];if(!h||h.rv)return;const t=prompt('Текст отзыва (необязательно)')||'';h.rv=st;SEL(h.sid).rv.push({n:S.name,s:st,t:t||'—'});save();render()}
@@ -135,57 +149,144 @@ if(S.bal<c)return toast('Проверка стоит '+fmt(c));if(!confirm('Пр
 function report(l,c){const fp=fair(l.base,l.real,l.defs)*S.mk;modal(`<h3>Отчёт о проверке</h3><div class="m">${esc(l.mo)}${c?' · списано '+fmt(c):''}</div><p>Реальное состояние: <b class="${l.real<l.cc?'bad':'ok'}">${l.real}/10</b> (заявлено ${l.cc}/10)</p><p>Неисправности:</p>${l.defs.length?l.defs.map(i=>`<span class="tag">${DEF[i][0]}</span>`).join(''):'<span class="ok">нет</span>'}<p>Справедливая цена: <b>${fmt(fp)}</b> (в объявлении ${fmt(l.price)})</p><button class="b" onclick="modal()">Закрыть</button>`)}
 /* ===== МОДУЛЬ 7: ИНТЕРФЕЙС ===== */
 const toast=t=>{const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)};
-function modal(h){const m=$('#md');if(!h){m.classList.remove('on');return}m.innerHTML='<div>'+h+'</div>';m.classList.add('on')}
+/* Анимации: закрытие модалки, переходы экранов, баланс, конфетти, свайпы */
+let noClick=0,dr=null,pb=null;
+function modal(h){const m=$('#md');if(!h){if(!m.classList.contains('on'))return;m.classList.add('out');modal.t=setTimeout(()=>m.classList.remove('on','out'),180);return}clearTimeout(modal.t);m.classList.remove('out');m.innerHTML='<div><i class="grab"></i>'+h+'</div>';m.classList.add('on')}
+function vt(){const m=$('#mn');m.classList.remove('vt');m.querySelectorAll('.grid>*').forEach((e,i)=>e.style.setProperty('--n',Math.min(i,12)));void m.offsetWidth;m.classList.add('vt');clearTimeout(vt.t);vt.t=setTimeout(()=>m.classList.remove('vt'),800)}
+function bal(n){const e=$('#hb');if(pb===null||pb===n){e.textContent=fmt(n);pb=n;return}const a=pb,t0=performance.now();pb=n;e.classList.remove('fu','fd');void e.offsetWidth;e.classList.add(n>a?'fu':'fd');(function s(t){const k=Math.min(1,(t-t0)/500);e.textContent=fmt(a+(n-a)*k);if(k<1)requestAnimationFrame(s)})(t0)}
+function conf(){for(let i=0;i<36;i++){const d=document.createElement('i');d.className='cf';d.style.cssText=`left:${R(5,95)}vw;background:hsl(${RI(0,360)} 80% 60%);animation-duration:${R(1.2,2.4)}s;animation-delay:${R(0,.4)}s`;document.body.append(d);setTimeout(()=>d.remove(),3000)}}
+function reel(c,win){const pool=[];for(let i=0;i<45;i++){let r=Math.random()*100;pool.push((c.it.find(x=>(r-=x[1])<0)||c.it[0])[0])}pool[38]=win;
+modal(`<h3 style="text-align:center">${c.ic} ${c.n}</h3><div class="reel"><div class="mark"></div><div class="strip" id="st">${pool.map((n,i)=>{const[b,mo,p]=findM(n);return`<div class="rc ${p>=60000?'e':p>=25000?'r':''}"><div style="height:64px">${pic({id:'r'+i,br:b,mo,cc:8,cd:[],defs:[]})}</div><small>${esc(mo)}</small></div>`}).join('')}</div></div>`);
+const st=$('#st');requestAnimationFrame(()=>requestAnimationFrame(()=>{const w=st.children[0].offsetWidth+8,rw=st.parentNode.offsetWidth;st.style.transition='transform 4.2s cubic-bezier(.08,.6,.1,1)';st.style.transform=`translateX(${-(38*w+w/2-rw/2+R(-w/3,w/3))}px)`}))}
+/* свайпы: корзина ← убрать, карточка ленты → в корзину, модалка ↓ закрыть */
+document.addEventListener('pointerdown',e=>{const t=e.target.closest('.sw,.it,.grab');if(!t)return;const g=t.classList.contains('grab');dr={t,el:g?t.parentNode:t,g,x:e.clientX,y:e.clientY,dx:0,dy:0}});
+document.addEventListener('pointermove',e=>{if(!dr)return;dr.dx=e.clientX-dr.x;dr.dy=e.clientY-dr.y;const{el,g,dx,dy}=dr;el.style.transition='none';if(g)el.style.transform=`translateY(${Math.max(0,dy)}px)`;else if(Math.abs(dx)>8){el.style.transform=`translateX(${dx}px)`;el.style.opacity=1-Math.abs(dx)/400}});
+document.addEventListener('pointerup',()=>{if(!dr)return;const{el,g,dx,dy,t}=dr;dr=null;el.style.transition='transform .25s,opacity .25s';const back=()=>{el.style.transform='';el.style.opacity=''};
+if(Math.abs(dx)>10||dy>10)noClick=Date.now();
+if(g){if(dy>90)modal();else back()}
+else if(t.classList.contains('sw')&&dx<-90){el.style.transform='translateX(-110%)';el.style.opacity=0;setTimeout(()=>{S.cart=S.cart.filter(x=>x!=t.dataset.id);save();render()},230)}
+else if(t.classList.contains('it')&&dx>90){el.style.transform='translateX(110%)';el.style.opacity=0;addCart(+t.dataset.id);setTimeout(back,350)}
+else back()});
+document.addEventListener('pointercancel',()=>{if(dr){dr.el.style.transform='';dr.el.style.opacity='';dr=null}});
 $('#md').onclick=e=>{if(e.target.id=='md')modal()};
-function hdr(){$('#hb').textContent=fmt(S.bal);$('#hs').textContent='День '+S.day+' · '+(myRate()?'★ '+myRate().toFixed(1):'нет оценок');const u=S.chats.reduce((a,c)=>a+(c.unread||0),0);
-$('#nv').innerHTML=[['feed','🏠','Лента'],['cart','🛒','Корзина',S.cart.length],['mine','📦','Моё'],['chats','💬','Чаты',u],['me','👤','Профиль']].map(([k,i,n,b])=>`<button class="${view==k?'on':''}" onclick="go('${k}')"><span>${i}</span>${n}${b?`<i class="bd">${b}</i>`:''}</button>`).join('')}
-function go(v){view=v;openChat=null;render()}
-function render(){hdr();const m=$('#mn');({feed:feedV,cart:cartV,mine:mineV,chats:chatsV,me:meV})[view](m);if(view=='chats'&&openChat){const e=$('.msgs');if(e)e.scrollTop=1e9}}
+function hdr(){bal(S.bal);$('#hs').textContent='День '+S.day+' · '+(myRate()?'★ '+myRate().toFixed(1):'нет оценок');const u=S.chats.reduce((a,c)=>a+(c.unread||0),0);
+$('#nv').innerHTML=[['feed','🏠','Лента'],['cart','🛒','Корзина',S.cart.length],['mine','📦','Моё'],['cases','🎁','Кейсы'],['chats','💬','Чаты',u],['me','👤','Профиль']].map(([k,i,n,b])=>`<button class="${view==k?'on':''}" onclick="go('${k}')"><span>${i}</span>${n}${b?`<i class="bd">${b}</i>`:''}</button>`).join('')}
+function go(v){view=v;openChat=null;render();vt()}
+function render(){hdr();const m=$('#mn');({feed:feedV,cart:cartV,mine:mineV,cases:casesV,chats:chatsV,me:meV})[view](m);if(view=='chats'&&openChat){const e=$('.msgs');if(e)e.scrollTop=1e9}}
 function feedV(m){m.innerHTML=`<div class="bar"><input id="fq" placeholder="Поиск: модель, бренд…" value="${esc(f.q)}"><select id="fs"><option value="new">Новые</option><option value="pa">Цена ↑</option><option value="pd">Цена ↓</option><option value="c">Состояние</option><option value="r">Рейтинг продавца</option></select></div>
 <div class="bar"><select id="fb"><option value="">Все бренды</option>${Object.keys(BR).map(b=>`<option>${b}</option>`).join('')}</select><input id="fmin" type="number" placeholder="Цена от" style="width:100px" value="${f.min}"><input id="fmax" type="number" placeholder="до" style="width:100px" value="${f.max}"><select id="fc">${[1,3,5,6,8,9].map(c=>`<option value="${c}">Состояние ≥ ${c}</option>`).join('')}</select><label class="m row"><input type="checkbox" id="fnd" ${f.nd?'checked':''}>без недостатков</label></div><div class="grid" id="ls"></div>`;
 $('#fs').value=f.s;$('#fb').value=f.b;$('#fc').value=f.c;
 ['fq','fs','fb','fmin','fmax','fc','fnd'].forEach(i=>$('#'+i).oninput=()=>{f={q:$('#fq').value,s:$('#fs').value,b:$('#fb').value,min:$('#fmin').value,max:$('#fmax').value,c:+$('#fc').value,nd:$('#fnd').checked};list()});list()}
 function list(){const e=$('#ls');if(!e)return;const q=f.q.toLowerCase();let a=S.L.filter(l=>(!q||(l.br+' '+l.mo).toLowerCase().includes(q))&&(!f.b||l.br==f.b)&&(!f.min||l.price>=+f.min)&&(!f.max||l.price<=+f.max)&&l.cc>=f.c&&(!f.nd||!l.cd.length));
 const so={new:(x,y)=>y.ts-x.ts,pa:(x,y)=>x.price-y.price,pd:(x,y)=>y.price-x.price,c:(x,y)=>y.cc-x.cc,r:(x,y)=>srate(SEL(y.sid))-srate(SEL(x.sid))};a.sort(so[f.s]);
-e.innerHTML=a.map(l=>`<div class="card it" onclick="card(${l.id})"><div class="ph">${pic(l)}</div><div class="pr">${fmt(l.price)}</div><div>${esc(l.br)} ${esc(l.mo)}</div><div class="m">Состояние ${l.cc}/10 · ${esc(SEL(l.sid).n)} <span class="st">${stars(srate(SEL(l.sid)))}</span></div>${l.cd.slice(0,2).map(i=>`<span class="tag">${DEF[i][0]}</span>`).join('')}</div>`).join('')||'<p class="m">Ничего не найдено</p>'}
-function card(id){const l=LST(id);if(!l)return modal();const s=SEL(l.sid),i=S.insp[id];
-modal(`<div class="ph" style="height:170px">${pic(l)}</div><h3 style="margin:4px 0">${esc(l.br)} ${esc(l.mo)}</h3><div class="pr">${fmt(l.price)}</div><p>Заявленное состояние: <b>${l.cc}/10</b></p><p>${l.cd.length?l.cd.map(d=>`<span class="tag">${DEF[d][0]}</span>`).join(''):'<span class="ok">Недостатки не заявлены</span>'}</p><p class="m">${esc(l.desc)}</p>
+e.innerHTML=a.map(l=>`<div class="card it" data-id="${l.id}" onclick="card(${l.id})"><div class="ph">${pic(l)}</div><div class="pr">${fmt(l.price)}</div><div>${esc(l.br)} ${esc(l.mo)}</div><div class="m">Состояние ${l.cc}/10 · ${esc(SEL(l.sid).n)} <span class="st">${stars(srate(SEL(l.sid)))}</span></div>${l.cd.slice(0,2).map(i=>`<span class="tag">${DEF[i][0]}</span>`).join('')}</div>`).join('')||'<p class="m">Ничего не найдено</p>'}
+function card(id){if(Date.now()-noClick<300)return;const l=LST(id);if(!l)return modal();const s=SEL(l.sid),i=S.insp[id];
+modal(`<div class="ph" style="height:170px">${pic(l)}</div><h3 style="margin:4px 0">${esc(l.br)} ${esc(l.mo)}</h3><div class="pr">${fmt(l.price)}</div><p>Заявленное состояние: <b>${l.cc}/10</b></p><p>${l.cd.length?l.cd.map(d=>`<span class="tag">${DEF[d][0]}</span>`).join(''):'<span class="ok">Недостатки не заявлены</span>'}</p><p class="m">${esc(l.desc)}</p><p class="m"><b>Внешний вид:</b> ${esc((LOOK[l.mo]||[])[2]||'')}</p>
 ${i?`<p class="${l.real<l.cc?'bad':'ok'}">Проверено: реально ${l.real}/10</p>`:''}
 <div class="row">${av(s.n)}<div><b>${esc(s.n)}</b><div class="st">${stars(srate(s))} <span class="m">${srate(s).toFixed(1)} · ${s.rv.length} отзывов</span></div></div></div>
 <div class="m" style="margin:6px 0">${s.rv.slice(-3).map(r=>`${esc(r.n)}: ${stars(r.s)} ${esc(r.t)}`).join('<br>')}</div>
 <div class="row" style="flex-wrap:wrap"><button class="b" onclick="addCart(${id})">В корзину</button><button class="b s" onclick="openC(${id})">Написать продавцу</button><button class="b s" onclick="inspect(${id})">Проверить телефон (${fmt(Math.max(100,l.price*.1))})</button></div>`)}
 /* Иллюстрация телефона: цвет и камеры зависят от бренда/модели, дефекты рисуются поверх */
-function pic(l){const h=hue(l.br),d=S.insp[l.id]?l.defs:l.cd,m=hue(l.mo)%3,k='fill="#111" stroke="#999" stroke-width=".8"';
-const cam=l.br=='lPhone'?`<rect x="18" y="10" width="30" height="30" rx="8" fill="#0006"/><circle cx="27" cy="19" r="5" ${k}/><circle cx="39" cy="19" r="5" ${k}/><circle cx="33" cy="31" r="5" ${k}/>`:m==0?`<circle cx="33" cy="22" r="12" fill="#0006"/><circle cx="33" cy="22" r="7" ${k}/>`:`<rect x="18" y="10" width="16" height="36" rx="8" fill="#0006"/><circle cx="26" cy="19" r="5" ${k}/><circle cx="26" cy="36" r="5" ${k}/>`;
+/* Внешний вид каждой модели: [оттенок (-1 светлый/серебро, -2 тёмный), тип камер 0-7, описание] */
+const LOOK={
+'Mi 9T Pro':[5,1,'Глянцевый корпус с огненно-красным или синим градиентом и выдвижной моторизованной фронтальной камерой сверху, без вырезов на экране.'],
+'Mi 11 Ultra':[-1,3,'Массивный керамический белый корпус с гигантским горизонтальным блоком камер на всю ширину и маленьким дополнительным мини-экраном справа от объективов.'],
+'Xiaoni 18 Pro Max':[210,0,'Ультрасовременный флагман с титановыми гранями, безрамочным экраном-водопадом и футуристичным круглым блоком камер с оптикой Leica и перископом.'],
+'Redmi 9A':[215,5,'Простой бюджетный пластиковый корпус синего цвета с вертикальной полосой текстуры и одной маленькой одиночной камерой в углу.'],
+'Redmi Note 8 Pro':[150,1,'Перламутрово-зелёный стеклянный корпус с центральным вертикальным блоком из четырёх камер и сканером отпечатков пальцев под ними.'],
+'Redmi K80':[250,0,'Строгий современный дизайн с плоскими матовыми гранями, круглым смещённым влево блоком камер и агрессивным игровым акцентом.'],
+'Poco F1':[-2,1,'Утилитарный корпус из матового кевлара (углеволокна) с красной окантовкой вокруг двойной центральной камеры и заметной «челкой» на экране.'],
+'Poco X3 Pro':[195,0,'Яркий корпус с широкой глянцевой полосой по центру, крупным логотипом и круглым блоком камер, вписанным в прямоугольник.'],
+'Poco F6':[-2,7,'Минималистичный тонкий корпус с двумя большими отдельными кольцами камер без подложки и тончайшими рамками экрана.'],
+'Poco M8':[50,6,'Молодёжный яркий жёлто-чёрный дизайн с крупной декоративной вставкой в верхней части спинки и тройной камерой.'],
+'Poco F9 Ultra':[-2,0,'Футуристичный игровой флагман с агрессивными линиями, RGB-подсветкой вокруг блока камер и перископическим телеобъективом.'],
+'GT Master Edition':[-1,1,'Уникальная спинка из серой веганской кожи с рельефными горизонтальными рёбрами, напоминающая дорожный чемодан, с автографом дизайнера.'],
+'GT 3 240W':[280,1,'Глянцевый корпус с прозрачным окошком справа от блока камер, через которое видна светящаяся RGB-рамка и муляж чипа.'],
+'Realme 12 Pro':[220,0,'Премиальный корпус из синей эко-кожи с золотой вертикальной строчкой по центру и большим круглым блоком камер с рифлёным безелем как у дорогих часов.'],
+'Find X7 Ultra':[30,0,'Двухцветный корпус (серебристое стекло сверху и оранжевая или чёрная эко-кожа снизу) с огромной круглой шайбой камер Hasselblad и двумя перископами.'],
+'Find X9 Pro':[-1,0,'Утончённый ультратонкий флагман с плавными изгибами корпуса, матовым стеклом и элегантным восьмиугольным блоком камер.'],
+'A6x':[290,1,'Лаконичный тонкий смартфон с переливающейся пастельной спинкой и аккуратным овальным островком для двух камер.'],
+'Reno 15F':[320,0,'Стильный имиджевый смартфон с мерцающим градиентным покрытием, плоскими гранями и кольцевой вспышкой Aura Light.'],
+'OnePlus 13':[225,0,'Элегантный корпус из тёмно-синей микрофибры с круглым смещённым блоком камер Hasselblad, пересечённым тонкой металлической линией, и фирменным переключателем режимов на торце.'],
+'Nord CE 5G':[175,1,'Лёгкий бирюзово-синий пластиковый корпус с вытянутым вертикальным блоком из трёх камер в левом верхнем углу.'],
+'Ace 5 Ultra':[-2,2,'Игровой смартфон с матовой металлической рамкой, агрессивным геометрическим узором на крышке и компактным блоком камер.'],
+'iPhone 12 mini':[-1,2,'Очень компактный смартфон с плоскими алюминиевыми гранями, квадратным блоком из двух камер по диагонали и «челкой» на экране.'],
+'iPhone 6 Flip':[-1,5,'Необычный концептуальный гибрид в стиле классического тонкого серебристого корпуса с кнопкой Home, но сгибающийся пополам как современная раскладушка.'],
+'iPhone 18 Pro Max':[-1,3,'Крупный флагман из шлифованного титана с обновлённым горизонтальным блоком из трёх крупных объективов, кнопкой управления камерой на грани и экраном без вырезов.'],
+'iPhone 16 e':[-2,5,'Минималистичный строгий корпус из матового стекла с плоскими гранями и всего одной крупной одиночной камерой в углу, без лишних элементов.'],
+'Galaxy S21 Ultra':[-2,1,'Массивный чёрный матовый корпус с фирменным металлическим блоком камер, плавно перетекающим прямо в боковую рамку телефона.'],
+'Galaxy S26':[-1,4,'Ультратонкий элегантный флагман с плоскими гранями, отдельно выступающими кольцами трёх камер в ряд и минималистичной стеклянной спинкой.'],
+'A54':[85,4,'Яркий лаймовый или фиолетовый глянцевый корпус с тремя отдельными вертикальными объективами без общего островка.'],
+'A03':[-2,2,'Простой текстурированный чёрный пластиковый корпус с небольшим квадратным блоком для двойной камеры и каплевидным вырезом на экране.'],
+'Mate 50 Pro':[25,0,'Премиальный корпус из оранжевой эко-кожи с большим симметричным круглым кольцом камер (Space Ring) по центру.'],
+'P60 Pro':[-1,2,'Уникальная перламутровая белая спинка с текстурой натурального жемчуга (Rococo Pearl) и прямоугольным блоком камер с одним огромным центральным объективом.'],
+'Pura 80 Ultra':[-2,6,'Авангардный флагман с выдвижным телескопическим объективом внутри стильного треугольного блока камер и кожаной спинкой с тиснением.'],
+'Nova 14i':[45,0,'Молодёжный смартфон с глянцевым корпусом, украшенным золотистым кольцом вокруг блока камер в стиле звёздной орбиты.'],
+'Robot Phone':[-2,3,'Футуристичный киберпанк-смартфон с механическими элементами, открытыми шарнирами, индустриальным дизайном и роботизированным модулем камеры.'],
+'Magik 7 Pro':[200,0,'Симметричный флагман с изогнутым со всех четырёх сторон экраном и крупным круглым блоком камер, вписанным в квадратную рамку со скруглёнными углами.'],
+'400 Lite':[280,6,'Ультратонкий и лёгкий смартфон с матовой переливающейся текстурой и аккуратным треугольным расположением камер.']};
+function camSVG(c,k){const dk='fill="#0006"',n=(x,y,r=5)=>`<circle cx="${x}" cy="${y}" r="${r}" ${k}/>`;return[
+`<circle cx="33" cy="22" r="12" ${dk}/>${n(33,22,7)}`,
+`<rect x="18" y="10" width="16" height="36" rx="8" ${dk}/>${n(26,19)+n(26,36)}`,
+`<rect x="18" y="10" width="30" height="30" rx="8" ${dk}/>${n(27,19)+n(39,19)+n(33,31)}`,
+`<rect x="14" y="8" width="52" height="18" rx="7" ${dk}/>${n(26,17,4)+n(40,17,4)+n(54,17,4)}`,
+n(26,16)+n(26,30)+n(26,44),n(26,18,8),
+`<rect x="16" y="8" width="32" height="30" rx="8" ${dk}/>${n(33,16)+n(24,29)+n(42,29)}`,
+n(26,16,7)+n(26,34,7)][c]}
+function pic(l){const L=LOOK[l.mo]||[hue(l.br),0],h=Math.abs(L[0]),sa=L[0]<0?6:45,[c1,c2]=L[0]==-2?[30,16]:L[0]<0?[72,40]:[48,26],d=S.insp[l.id]?l.defs:l.cd,k='fill="#111" stroke="#999" stroke-width=".8"';
+const cam=camSVG(L[1],k);
 const fx=(d.includes(0)?'<path d="M52 60 L40 80 L48 92 M40 80 L28 88 L33 112" stroke="#fffd" stroke-width="1" fill="none"/>':'')+(d.includes(7)?'<path d="M20 70 L44 84 M24 96 L52 88 M30 60 L58 66" stroke="#fff6" stroke-width=".7"/>':'')+(d.includes(8)?'<ellipse cx="60" cy="20" rx="4" ry="6" fill="#0008"/>':'')+(d.includes(9)?'<circle cx="30" cy="100" r="10" fill="#4a90e233"/><circle cx="48" cy="88" r="7" fill="#4a90e233"/>':'')+(d.includes(1)||d.includes(2)?'<rect x="54" y="110" width="5" height="5" fill="#f55a"/>':'');
-return`<svg viewBox="0 0 80 130" style="height:100%;filter:saturate(${l.cc<=3?.5:1})"><defs><linearGradient id="g${l.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h} 45% 48%)"/><stop offset="1" stop-color="hsl(${(h+40)%360} 45% 26%)"/></linearGradient></defs><rect x="12" y="3" width="56" height="124" rx="10" fill="url(#g${l.id})" stroke="#fff3"/>${cam}<text x="40" y="120" font-size="6" fill="#fffb" text-anchor="middle">${esc(l.br)}</text>${fx}</svg>`}
-function addCart(id){if(!S.cart.includes(id))S.cart.push(id);save();modal();hdr();toast('Добавлено в корзину')}
+return`<svg viewBox="0 0 80 130" style="height:100%;filter:saturate(${l.cc<=3?.5:1})"><defs><linearGradient id="g${l.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h} ${sa}% ${c1}%)"/><stop offset="1" stop-color="hsl(${(h+40)%360} ${sa}% ${c2}%)"/></linearGradient></defs><rect x="12" y="3" width="56" height="124" rx="10" fill="url(#g${l.id})" stroke="#fff3"/>${cam}<text x="40" y="120" font-size="6" fill="#fffb" text-anchor="middle">${esc(l.br)}</text>${fx}</svg>`}
+function addCart(id){if(!S.cart.includes(id))S.cart.push(id);save();modal();hdr();const nb=document.querySelectorAll('nav button')[1];if(nb)nb.classList.add('bump');toast('Добавлено в корзину')}
 function openC(lid){const l=LST(lid);let ch=S.chats.find(c=>c.lid==lid&&c.role=='s');if(!ch){ch={id:S.uid++,lid,w:l.sid,role:'s',msgs:[],agreed:0,unread:0};S.chats.push(ch)}modal();view='chats';openChat=ch.id;save();render()}
 function cartV(m){const a=S.cart.map(LST).filter(Boolean),t=a.reduce((s,l)=>s+priceOf(l),0);
-m.innerHTML=`<h3>Корзина</h3>${a.map(l=>`<div class="card row sp" style="margin-bottom:8px"><div>${esc(l.mo)}<div class="m">${esc(SEL(l.sid).n)}${priceOf(l)<l.price?' · цена по договорённости':''}</div></div><div class="row"><b>${fmt(priceOf(l))}</b><button class="b s" onclick="S.cart=S.cart.filter(x=>x!=${l.id});render()">✕</button></div></div>`).join('')||'<p class="m">Корзина пуста</p>'}${a.length?`<div class="row sp"><b>Итого: ${fmt(t)}</b><button class="b g" onclick="checkout()">Оформить</button></div>${t>S.bal?'<p class="bad">Недостаточно средств на балансе</p>':''}`:''}`}
-function mineV(m){m.innerHTML=`<h3>Инвентарь</h3><div class="grid">${S.inv.map((it,i)=>`<div class="card"><b>${esc(it.mo)}</b><div class="m">Куплен за ${fmt(it.cost)}<br>Реально: ${it.real}/10</div>${it.defs.map(d=>`<span class="tag">${DEF[d][0]}</span>`).join('')||'<span class="ok m">без недостатков</span>'}<div style="margin-top:8px"><button class="b" onclick="sellForm(${i})">Выставить</button></div></div>`).join('')||'<p class="m">Пусто. Купите телефон на Барахолке.</p>'}</div>
+m.innerHTML=`<h3>Корзина</h3><div class="m">← свайп влево убирает товар</div>${a.map(l=>`<div class="card row sp sw" data-id="${l.id}" style="margin-bottom:8px"><div>${esc(l.mo)}<div class="m">${esc(SEL(l.sid).n)}${priceOf(l)<l.price?' · цена по договорённости':''}</div></div><div class="row"><b>${fmt(priceOf(l))}</b><button class="b s" onclick="S.cart=S.cart.filter(x=>x!=${l.id});render()">✕</button></div></div>`).join('')||'<p class="m">Корзина пуста</p>'}${a.length?`<div class="row sp"><b>Итого: ${fmt(t)}</b><button class="b g" onclick="checkout()">Оформить</button></div>${t>S.bal?'<p class="bad">Недостаточно средств на балансе</p>':''}`:''}`}
+function mineV(m){m.innerHTML=`<h3>Инвентарь</h3><div class="grid">${S.inv.map((it,i)=>`<div class="card"><b>${esc(it.mo)}</b><div class="m">Куплен за ${fmt(it.cost)}<br>Реально: ${it.real}/10${it.fake?'<br><b class="bad">⚠ Китайская подделка</b>':''}</div>${it.defs.map(d=>`<span class="tag">${DEF[d][0]}</span>`).join('')||'<span class="ok m">без недостатков</span>'}<div style="margin-top:8px"><button class="b" onclick="sellForm(${i})">Выставить</button></div></div>`).join('')||'<p class="m">Пусто. Купите телефон на Барахолке.</p>'}</div>
 <h3>Мои объявления</h3><div class="grid">${S.mine.map(l=>`<div class="card"><b>${esc(l.mo)}</b><div class="pr">${fmt(l.price)}</div><div class="m">Заявлено ${l.cc}/10 · чатов: ${S.chats.filter(c=>c.lid==l.id).length}</div><button class="b s" onclick="unlist(${l.id})">Снять</button></div>`).join('')||'<p class="m">Нет активных объявлений</p>'}</div>`}
-function sellForm(i){const it=S.inv[i];window._i=i;modal(`<h3>Новое объявление: ${esc(it.mo)}</h3><div class="col"><label>Заявленное состояние: <b id="cv">${it.real}</b>/10<input type="range" min="1" max="10" value="${it.real}" id="sc" style="width:100%"></label><div class="m">Заявленные недостатки:</div><div>${DEF.map((d,j)=>`<label style="display:inline-block;margin:2px 8px 2px 0"><input type="checkbox" class="sd" value="${j}" ${it.defs.includes(j)?'checked':''}> ${d[0]}</label>`).join('')}</div><label>Цена, ₽<input type="number" id="sp" style="width:100%"></label><button class="b g" onclick="mkAd()">Опубликовать</button></div>`);
-const up=()=>{$('#cv').textContent=$('#sc').value;$('#sp').value=r50(fair(it.base,+$('#sc').value,[...document.querySelectorAll('.sd:checked')].map(x=>+x.value))*S.mk)};$('#sc').oninput=up;document.querySelectorAll('.sd').forEach(x=>x.onchange=up);up()}
+function sellForm(i){const it=S.inv[i];window._i=i;modal(`<h3>Новое объявление: ${esc(it.mo)}</h3><div class="col"><label>Заявленное состояние: <b id="cv">${it.real}</b>/10<input type="range" min="1" max="10" value="${it.real}" id="sc" style="width:100%"></label><div class="m">Заявленные недостатки:</div><div>${DEF.map((d,j)=>`<label style="display:inline-block;margin:2px 8px 2px 0"><input type="checkbox" class="sd" value="${j}" ${it.defs.includes(j)?'checked':''}> ${d[0]}</label>`).join('')}</div>${it.fake?'<label><input type="checkbox" id="fo" checked> Выдать подделку за оригинал (45% шанс разоблачения, штраф 50% баланса)</label>':''}<label>Цена, ₽<input type="number" id="sp" style="width:100%"></label><button class="b g" onclick="mkAd()">Опубликовать</button></div>`);
+const up=()=>{$('#cv').textContent=$('#sc').value;$('#sp').value=r50(fair(it.base,+$('#sc').value,[...document.querySelectorAll('.sd:checked')].map(x=>+x.value))*S.mk*(it.fake&&!$('#fo').checked?.25:1))};if(it.fake)$('#fo').onchange=up;$('#sc').oninput=up;document.querySelectorAll('.sd').forEach(x=>x.onchange=up);up()}
 function mkAd(){const it=S.inv[_i],cc=+$('#sc').value,cd=[...document.querySelectorAll('.sd:checked')].map(x=>+x.value),price=+$('#sp').value;if(price<100)return toast('Укажите цену');
-S.inv.splice(_i,1);S.mine.push({id:it.id,sid:0,br:it.br,mo:it.mo,base:it.base,real:it.real,defs:it.defs,cc,cd,price,own:1,it,ts:Date.now(),desc:''});save();modal();render();toast('Объявление опубликовано — ждите сообщений')}
+S.inv.splice(_i,1);S.mine.push({id:it.id,sid:0,br:it.br,mo:it.mo,base:it.base,real:it.real,defs:it.defs,cc,cd,price,own:1,it,ts:Date.now(),desc:'',fk:it.fake&&$('#fo').checked?1:0,cp:it.fake&&!$('#fo').checked?1:0});save();modal();render();toast('Объявление опубликовано — ждите сообщений')}
 function unlist(id){const l=S.mine.find(x=>x.id==id);S.inv.push(l.it);S.mine=S.mine.filter(x=>x.id!=id);S.chats.forEach(c=>{if(c.lid==id)c.closed=1});save();render()}
 function chatsV(m){if(openChat)return chatV(m);const a=S.chats.filter(c=>c.msgs.length).sort((x,y)=>y.id-x.id);
-m.innerHTML='<h3>Чаты</h3>'+(a.map(c=>{const s=SEL(c.w),l=LST(c.lid);return`<div class="card row" style="margin-bottom:8px;cursor:pointer" onclick="openChat=${c.id};render()">${av(s.n)}<div style="flex:1"><b>${esc(s.n)}</b><div class="m">${l?esc(l.mo):'объявление снято'} · ${esc(c.msgs.at(-1).t.slice(0,40))}</div></div>${c.unread?`<i class="bd" style="position:static">${c.unread}</i>`:''}</div>`}).join('')||'<p class="m">Чатов пока нет</p>')}
+m.innerHTML='<h3>Чаты</h3>'+(a.map(c=>{const s=SEL(c.w),l=LST(c.lid);return`<div class="card row" style="margin-bottom:8px;cursor:pointer" onclick="openChat=${c.id};render();vt()">${av(s.n)}<div style="flex:1"><b>${esc(s.n)}</b><div class="m">${l?esc(l.mo):'объявление снято'} · ${esc(c.msgs.at(-1).t.slice(0,40))}</div></div>${c.unread?`<i class="bd" style="position:static">${c.unread}</i>`:''}</div>`}).join('')||'<p class="m">Чатов пока нет</p>')}
 function chatV(m){const ch=S.chats.find(c=>c.id==openChat);if(!ch){openChat=null;return chatsV(m)}ch.unread=0;const l=LST(ch.lid),s=SEL(ch.w),b=ch.role=='b';
 const base=l?l.price:0,chips=b?['Цена окончательная',`Отдам за ${r50(base*.95)}`,'Телефон в идеале']:['Какое состояние?','Есть недостатки?',`Отдадите за ${r50(base*.85)}?`,'Можно проверить?','Видел такой дешевле','Ок, согласен'];
-m.innerHTML=`<div class="row" style="margin-bottom:8px"><button class="b s" onclick="openChat=null;render()">←</button>${av(s.n)}<div><b>${esc(s.n)}</b><div class="m">${typing[ch.id]?'печатает…':'в сети'} · ${l?esc(l.mo)+' · '+fmt(l.price):'снято'}</div></div></div>
-<div class="card"><div class="msgs">${ch.msgs.map(x=>`<div class="bu ${x.f=='m'?'me':''}">${esc(x.t)}</div>`).join('')||'<div class="m">Напишите первым</div>'}</div>
+m.innerHTML=`<div class="row" style="margin-bottom:8px"><button class="b s" onclick="openChat=null;render();vt()">←</button>${av(s.n)}<div><b>${esc(s.n)}</b><div class="m">${typing[ch.id]?'<span class="ty">печатает <i>●</i><i>●</i><i>●</i></span>':'в сети'} · ${l?esc(l.mo)+' · '+fmt(l.price):'снято'}</div></div></div>
+<div class="card"><div class="msgs">${ch.msgs.map((x,i,a)=>`<div class="bu ${x.f=='m'?'me':''}${i==a.length-1&&!typing[ch.id]?' new':''}">${esc(x.t)}</div>`).join('')||'<div class="m">Напишите первым</div>'}${typing[ch.id]?'<div class="bu new"><span class="ty"><i>●</i><i>●</i><i>●</i></span></div>':''}</div>
 ${ch.closed?'<div class="m">Диалог завершён</div>':`<div class="row" style="flex-wrap:wrap;margin:6px 0">${chips.map(c=>`<button class="chip" onclick="sendMsg(this.textContent)">${esc(c)}</button>`).join('')}</div><div class="row"><input id="ci" style="flex:1" placeholder="Сообщение…" onkeydown="if(event.key=='Enter')sendMsg()"><button class="b" onclick="sendMsg()">➤</button></div>`}
 <div class="row" style="flex-wrap:wrap;margin-top:8px">${b&&ch.deal&&l?`<button class="b g" onclick="sellDeal(${ch.id})">Продать за ${fmt(ch.deal)}</button>`:''}${!b&&l?`<button class="b s" onclick="addCart(${l.id});go('cart')">В корзину ${ch.agreed?'за '+fmt(ch.agreed):''}</button><button class="b s" onclick="inspect(${l.id})">Проверить</button>`:''}</div></div>`}
 function meV(m){const nw=S.bal+S.inv.reduce((a,i)=>a+fair(i.base,i.real,i.defs)*S.mk,0);
 m.innerHTML=`<div class="card row">${av(S.name)}<div><b>${esc(S.name)}</b><div class="st">${myRate()?stars(myRate())+' '+myRate().toFixed(1):'пока без отзывов'}</div></div></div>
 <div class="grid" style="margin:10px 0"><div class="card"><div class="m">Баланс</div><div class="pr ok">${fmt(S.bal)}</div></div><div class="card"><div class="m">Прибыль</div><div class="pr ${S.profit>=0?'ok':'bad'}">${fmt(S.profit)}</div></div><div class="card"><div class="m">Продаж</div><div class="pr">${S.sold}</div></div><div class="card"><div class="m">Капитал (с товаром)</div><div class="pr">${fmt(nw)}</div></div></div>
 <h3>Отзывы обо мне</h3>${S.rev.slice(-6).reverse().map(r=>`<div class="card" style="margin-bottom:6px"><b>${esc(r.n)}</b> <span class="st">${stars(r.s)}</span><div class="m">${esc(r.t)}</div></div>`).join('')||'<p class="m">Пока нет</p>'}
-<h3>История сделок</h3>${S.hist.slice(0,30).map((h,i)=>`<div class="card row sp" style="margin-bottom:6px"><div>${esc(h.txt)}<div class="m">${new Date(h.ts).toLocaleTimeString('ru-RU')} · ${esc(SEL(h.sid).n)}</div></div><div style="text-align:right"><b class="${h.amt>=0?'ok':'bad'}">${h.amt>=0?'+':''}${fmt(h.amt)}</b>${(h.t=='buy'||h.t=='sell')&&!h.rv?`<div>${[1,2,3,4,5].map(n=>`<button class="chip" onclick="rate(${i},${n})">${n}★</button>`).join('')}</div>`:''}</div></div>`).join('')||'<p class="m">Сделок нет</p>'}
-<button class="b r" style="margin-top:12px" onclick="if(confirm('Начать заново?')){localStorage.removeItem('bobo1');init();go('feed')}">Сбросить игру</button>`}
+<h3>История сделок</h3>${S.hist.slice(0,30).map((h,i)=>`<div class="card row sp" style="margin-bottom:6px"><div>${esc(h.txt)}<div class="m">${new Date(h.ts).toLocaleTimeString('ru-RU')} · ${esc(h.sid?SEL(h.sid).n:'Кейс')}</div></div><div style="text-align:right"><b class="${h.amt>=0?'ok':'bad'}">${h.amt>=0?'+':''}${fmt(h.amt)}</b>${(h.t=='buy'||h.t=='sell')&&!h.rv?`<div>${[1,2,3,4,5].map(n=>`<button class="chip" onclick="rate(${i},${n})">${n}★</button>`).join('')}</div>`:''}</div></div>`).join('')||'<p class="m">Сделок нет</p>'}
+${ACC?'':'<p class="m bad">Гостевой режим: прогресс не сохраняется</p>'}<button class="b r" style="margin-top:12px" onclick="if(confirm('Начать заново?')){if(ACC)localStorage.removeItem('bobo_u_'+ACC);init();S.name=ACC||S.name;go('feed')}">Сбросить игру</button> <button class="b s" style="margin-top:12px" onclick="location.reload()">Выйти</button>`}
+/* ===== МОДУЛЬ 7б: КЕЙСЫ ===== it: [модель, шанс %] */
+const CASES=[
+{id:'b',n:'Кейс бомжа',ic:'🥫',pr:0,cd:600000,c:[2,6],d:'Бесплатно раз в 10 минут. 5 самых дешёвых телефонов.',it:[['iPhone 6 Flip',30],['Redmi 9A',26],['A03',24],['Poco F1',13],['Redmi Note 8 Pro',7]]},
+{id:'g',n:'Заказ с GooFish',ic:'📦',pr:5000,c:[3,8],fk:.3,d:'Без ограничения по времени. Устройства 3–8 тыс. ₽, но может прийти китайская подделка.',it:[['Redmi 9A',30],['A03',30],['Poco F1',24],['Redmi Note 8 Pro',16]]},
+{id:'f',n:'Флагманы',ic:'💎',pr:35000,c:[5,10],d:'От 20 000 ₽ и выше. Самый дорогой — 6%.',it:[['iPhone 12 mini',21],['Realme 12 Pro',17],['Galaxy S21 Ultra',14],['Redmi K80',11],['Mate 50 Pro',9],['Poco F9 Ultra',8],['Find X7 Ultra',8],['Pura 80 Ultra',6],['iPhone 18 Pro Max',6]]}];
+const findM=mo=>ALL.find(m=>m[1]==mo);
+function casesV(m){m.innerHTML='<h3>Кейсы</h3><div class="grid">'+CASES.map(c=>`<div class="card col"><div class="ph" style="font-size:46px">${c.ic}</div><b>${c.n}</b><div class="pr">${c.pr?fmt(c.pr):'Бесплатно'}</div><div class="m">${c.d}</div>${c.cd?'<div class="m">Следующий: <b id="cdt"></b></div>':''}<div class="row"><button class="b g" onclick="openCase('${c.id}')">Открыть</button><button class="b s" onclick="odds('${c.id}')">Шансы</button></div></div>`).join('')+'</div>';cdTick()}
+function cdTick(){const e=$('#cdt');if(!e||!S)return;const r=600000-(Date.now()-(S.cb||0));e.textContent=r>0?Math.floor(r/60000)+':'+String(Math.floor(r/1000)%60).padStart(2,'0'):'доступен'}
+function odds(id){const c=CASES.find(x=>x.id==id);modal(`<h3>${c.n}: шансы</h3>${c.it.map(([n,p])=>`<div class="row sp card" style="margin-bottom:6px"><span>${n} <span class="m">(~${fmt(findM(n)[2])})</span></span><b>${p}%</b></div>`).join('')}${c.fk?`<p class="m">Шанс китайской подделки в каждой посылке: <b>${c.fk*100}%</b>. Если выдать её за оригинал: 45% разоблачения и штраф 50% баланса.</p>`:''}<button class="b" onclick="modal()">Закрыть</button>`)}
+function openCase(id){const c=CASES.find(x=>x.id==id),now=Date.now();if(c.cd&&now-(S.cb||0)<c.cd)return toast('Кейс пока недоступен');if(S.bal<c.pr)return toast('Не хватает денег');
+S.bal-=c.pr;if(c.cd)S.cb=now;let r=Math.random()*100;const pk=c.it.find(x=>(r-=x[1])<0)||c.it[0],[br,mo,base]=findM(pk[0]),real=RI(...c.c),nd=real>=9?RI(0,1):real>=7?RI(0,2):real>=5?RI(1,3):RI(2,5),defs=pickD(nd),fake=!!c.fk&&Math.random()<c.fk;
+const it={id:S.uid++,br,mo,base,real,defs,cost:c.pr,fake};S.inv.push(it);addHist('case','Кейс «'+c.n+'»: '+mo+(fake?' (подделка)':''),-c.pr,0);save();hdr();reel(c,pk[0]);
+setTimeout(()=>{if(base>=20000)conf();modal(`<div class="ph win" style="height:170px">${pic({id:it.id,br,mo,cc:real,cd:defs,defs})}</div><h3>${br} ${mo}</h3><p>Состояние: <b>${real}/10</b> · около ${fmt(fair(base,real,defs))}</p>${fake?'<p class="bad">⚠ Китайская подделка! Продавать как оригинал рискованно.</p>':''}<p class="m">Телефон в разделе «Моё».</p><button class="b" onclick="modal();render()">Отлично</button>`);render()},4700)}
+/* ===== МОДУЛЬ 7в: АККАУНТЫ (локально в браузере; для общих ников нужен сервер) ===== */
+async function hp(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('bobo:'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const USERS=()=>{try{return JSON.parse(localStorage.getItem('bobo_users'))||{}}catch(e){return{}}};
+function authV(){$('#nv').innerHTML='';$('#hb').textContent='';$('#hs').textContent='';$('#mn').innerHTML=`<div class="card col" style="max-width:380px;margin:30px auto"><div class="logo" style="font-size:26px;text-align:center">Bobo<b>Phone</b></div><div class="m" style="text-align:center">Войдите или создайте аккаунт</div><input id="un" placeholder="Ник" maxlength="16"><input id="pw" type="password" placeholder="Пароль (от 4 символов)"><div id="am" class="bad"></div><button class="b" onclick="auth(0)">Войти</button><button class="b s" onclick="auth(1)">Создать аккаунт</button><hr style="border-color:var(--c2);width:100%"><button class="b s" onclick="guest()">Продолжить как гость</button><div class="m">Гость: прогресс не сохраняется. Аккаунты хранятся в этом браузере.</div></div>`}
+async function auth(reg){const n=$('#un').value.trim(),p=$('#pw').value,k=n.toLowerCase(),U=USERS(),am=$('#am');
+if(n.length<3||!/^[\wа-яё .-]+$/i.test(n))return am.textContent='Ник: 3–16 символов, буквы и цифры';if(p.length<4)return am.textContent='Пароль минимум 4 символа';
+const h=await hp(p);if(reg){if(U[k]||NAMES.some(x=>x.toLowerCase()==k))return am.textContent='Такой ник уже занят';U[k]={n,h};localStorage.setItem('bobo_users',JSON.stringify(U))}
+else if(!U[k]||U[k].h!==h)return am.textContent='Неверный ник или пароль';start(U[k].n)}
+function guest(){if(confirm('Гостевой режим: прогресс НЕ будет сохранён после закрытия страницы. Продолжить?'))start(null)}
+function start(n){ACC=n;S=n&&load();if(!S){init();if(n)S.name=n}view='feed';save();render();vt();if(!started){started=1;setInterval(tick,12000);setInterval(cdTick,1000)}}
 /* ===== МОДУЛЬ 8: МУЛЬТИПЛЕЕР (заглушка) =====
  Реальные игроки подключаются через Net (WebSocket/Firebase): Net.publish(listing), Net.onMessage(chatId,cb), Net.send(chatId,text).
  Без бэкенда «другие игроки» имитируются теми же персонажами рынка — для игрока различий нет. */
-S=load();if(!S)init();render();setInterval(tick,12000);
+authV();
 </script></body></html>
