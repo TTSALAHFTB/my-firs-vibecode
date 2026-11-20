@@ -27,7 +27,7 @@ jobs:
             sed -i 's/<string name="title_activity_main">[^<]*<\/string>/<string name="title_activity_main">BoboPhone<\/string>/g' android/app/src/main/res/values/strings.xml
           fi
 
-          # 2. Конвертируем logo.jpg / logo.jpeg в logo.png через Node.js (sharp)
+          # 2. Конвертируем logo.jpg / logo.jpeg в logo.png и создаём все слои иконки
           if [ -f "logo.jpg" ]; then
             node -e "require('sharp')('logo.jpg').png().toFile('logo.png')"
           fi
@@ -38,6 +38,7 @@ jobs:
             mkdir -p assets
             cp logo.png assets/icon-only.png
             cp logo.png assets/icon-foreground.png
+            cp logo.png assets/icon-background.png
             npx capacitor-assets generate --android --iconBackgroundColor '#ffffff'
           fi
 
@@ -71,4 +72,3 @@ jobs:
         with:
           name: BoboPhone
           path: android/app/build/outputs/apk/debug/BoboPhone.apk
-
