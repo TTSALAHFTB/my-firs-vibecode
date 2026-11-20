@@ -15,15 +15,38 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Fix config and sync
+      - name: Configure app, icons, assets and sync
         run: |
           npm install
+          npm install @capacitor/assets --save-dev
+
+          # 1. Меняем название приложения на BoboPhone
+          sed -i 's/"appName": *"[^"]*"/"appName": "BoboPhone"/g' capacitor.config.json
+          if [ -f "android/app/src/main/res/values/strings.xml" ]; then
+            sed -i 's/<string name="app_name">[^<]*<\/string>/<string name="app_name">BoboPhone<\/string>/g' android/app/src/main/res/values/strings.xml
+            sed -i 's/<string name="title_activity_main">[^<]*<\/string>/<string name="title_activity_main">BoboPhone<\/string>/g' android/app/src/main/res/values/strings.xml
+          fi
+
+          # 2. Делаем иконку из logo.jpg / logo.jpeg / logo.png
+          if [ -f "logo.jpg" ]; then convert logo.jpg logo.png; fi
+          if [ -f "logo.jpeg" ]; then convert logo.jpeg logo.png; fi
+          if [ -f "logo.png" ]; then
+            mkdir -p assets
+            cp logo.png assets/icon-only.png
+            cp logo.png assets/icon-foreground.png
+            npx capacitor-assets generate --android --iconBackgroundColor '#ffffff'
+          fi
+
+          # 3. Исправляем папку www/ww и копируем туда картинки для HTML
           if [ -d "www" ]; then
             sed -i 's/"ww"/"www"/g' capacitor.config.json
-          elif [ ! -d "ww" ]; then
+            cp *.jpg *.jpeg *.png *.gif www/ 2>/dev/null || true
+          else
             mkdir -p ww
             if [ -f "index.html" ]; then cp index.html ww/; fi
+            cp *.jpg *.jpeg *.png *.gif ww/ 2>/dev/null || true
           fi
+
           npx cap sync android
 
       - name: Set up Java
@@ -37,9 +60,10 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/BoboPhone.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: BoboPhone
+          path: android/app/build/outputs/apk/debug/BoboPhone.apk
